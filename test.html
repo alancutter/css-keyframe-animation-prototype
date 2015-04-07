@@ -1,0 +1,41 @@
+<script src="test.js"></script>
+
+<style>
+div {
+  border: solid;
+  margin: 100px;
+}
+
+#container {
+  width: 200px;
+  color: blue;
+  transform: translate(10px, 10px) rotate(45deg);
+}
+
+#target {
+  width: 100px;
+  color: green;
+  transform: translate(10px, 10px) rotate(45deg);
+}
+</style>
+
+<div id="container">
+  container
+  <div id="target">target</div>
+</div>
+
+<script>
+target.animate([
+  {transform: 'inherit', composite: 'accumulate'},
+  // Equivalent to:
+  // {transform: 'translate(10px, 10px) rotate(45deg)'},
+  // {transform: 'translate(20px, 20px) rotate(90deg)'},
+], 1000);
+target.animate([
+  {transform: 'inherit', composite: 'add'},
+  {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)', composite: 'replace'},
+  // Equivalent to:
+  // {transform: 'translate(10px, 10px) rotate(45deg)', composite: 'add'},
+  // {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)'},
+], 2000);
+</script>
