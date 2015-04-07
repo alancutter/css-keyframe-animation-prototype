@@ -1,19 +1,3 @@
-TODAY
-
-Youedited an item
-09:06
-Javascript
-test.js
-YESTERDAY
-
-Youuploaded an item
-Tue 20:21
-Javascript
-test.js
-No recorded activity before 7 April 2015
-20 MB used (0%)
-Buy more storage
-test.jsOpen
 (function() {
 'use strict';
 var activeElements = [];
