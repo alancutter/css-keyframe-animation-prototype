@@ -105,7 +105,23 @@ Interpolation.prototype.ensureInterpolated = function(environment, underlyingVal
     }
   }
   if (!this.cache) {
-    // BOOKMARK
+    this.cache = {};
+    for (var side of ['start', 'end']) {
+      var keyframe = this.immutable[side];
+      for (var animationType in this.immutable.animationTypes) {
+        var result = animationType.convertSingleInEnvironment(keyframe, environment, underlyingValue);
+        if (result) {
+          this.cache[side] = {
+            animationType: animationType,
+            invalidator: result.invalidator,
+            interpolableValue: result.interpolableValue,
+            nonInterpolableValue: result.nonInterpolableValue,
+          };
+          break;
+        }
+      }
+      console.assert(this.cache[side]);
+    }
   }
   console.assert(this.cache);
   this.interpolate(this.state.fraction);
