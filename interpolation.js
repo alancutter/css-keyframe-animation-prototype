@@ -44,6 +44,9 @@ Interpolation.prototype.interpolate = function(fraction) {
       underlyingFractionForComposite(this.immutable.end.composite),
       fraction);
   if (!this.cache) {
+    this.state.animationType = null;
+    this.state.interpolableValue = null;
+    this.state.nonInterpolableValue = null;
     return;
   }
   var start = this.cache.start;
@@ -81,21 +84,28 @@ Interpolation.prototype.asUnderlyingValue = function() {
 
 Interpolation.prototype.isInterpolated = function() {
   var isInterpolated = this.state.animationType !== null;
+  console.assert(isInterpolated == (this.cache !== null));
   console.assert(isInterpolated == (this.state.interpolableValue !== null));
   console.assert(isInterpolated == (this.state.nonInterpolableValue !== null));
   return isInterpolated;
 };
 
 Interpolation.prototype.ensureInterpolated = function(environment, underlyingValue) {
-  if (this.isInterpolated()) {
+  var needsReconversion = !this.cache
+    || (this.cache.start.invalidator && this.cache.start.invalidator(environment, underlyingValue))
+    || (this.cache.end.invalidator && this.cache.end.invalidator(environment, underlyingValue));
+  if (!needsReconversion && this.isInterpolated()) {
     return;
   }
   for (var animationType of this.immutable.animationTypes) {
-    var result = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
-    if (result) {
-      this.cacheResult(result);
+    var resultPair = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
+    if (resultPair) {
+      this.cachePair(resultPair);
       break;
     }
+  }
+  if (!this.cache) {
+    // BOOKMARK
   }
   console.assert(this.cache);
   this.interpolate(this.state.fraction);
