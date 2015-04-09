@@ -5,22 +5,9 @@ function Interpolation(immutableData) {
   this.immutable = immutableData;
   this.cache = null;
   for (var animationType of this.immutable.animationTypes) {
-    var result = animationType.maybeConvertPair(this.immutable.start, this.immutable.end);
-    if (result) {
-      this.cache = {
-        start: {
-          animationType: animationType,
-          invalidator: result.start.invalidator,
-          interpolableValue: result.start.interpolableValue,
-          nonInterpolableValue: result.start.nonInterpolableValue,
-        },
-        end: {
-          animationType: animationType,
-          invalidator: result.end.invalidator,
-          interpolableValue: result.end.interpolableValue,
-          nonInterpolableValue: result.end.nonInterpolableValue,
-        },
-      };
+    var resultPair = animationType.maybeConvertPair(this.immutable.start, this.immutable.end);
+    if (resultPair) {
+      this.cachePair(resultPair);
       break;
     }
   }
@@ -32,6 +19,23 @@ function Interpolation(immutableData) {
     nonInterpolableValue: null,
   };
 }
+
+Interpolation.prototype.cachePair = function(pair) {
+  this.cache = {
+    start: {
+      animationType: animationType,
+      invalidator: pair.start.invalidator,
+      interpolableValue: pair.start.interpolableValue,
+      nonInterpolableValue: pair.start.nonInterpolableValue,
+    },
+    end: {
+      animationType: animationType,
+      invalidator: pair.end.invalidator,
+      interpolableValue: pair.end.interpolableValue,
+      nonInterpolableValue: pair.end.nonInterpolableValue,
+    },
+  };
+};
 
 Interpolation.prototype.interpolate = function(fraction) {
   this.state.fraction = fraction;
@@ -54,7 +58,7 @@ Interpolation.prototype.interpolate = function(fraction) {
     this.state.interpolableValue = side.interpolableValue;
     this.state.nonInterpolableValue = side.nonInterpolableValue;
   }
-}
+};
 
 Interpolation.prototype.getUnderlyingValue = function(environment) {
   for (var animationType of this.immutable.animationTypes) {
@@ -73,25 +77,29 @@ Interpolation.prototype.asUnderlyingValue = function() {
     interpolableValue: this.state.interpolableValue,
     nonInterpolableValue: this.state.nonInterpolableValue,
   };
-}
+};
 
 Interpolation.prototype.isInterpolated = function() {
   var isInterpolated = this.state.animationType !== null;
   console.assert(isInterpolated == (this.state.interpolableValue !== null));
   console.assert(isInterpolated == (this.state.nonInterpolableValue !== null));
   return isInterpolated;
-}
+};
 
 Interpolation.prototype.ensureInterpolated = function(environment, underlyingValue) {
   if (this.isInterpolated()) {
     return;
   }
   for (var animationType of this.immutable.animationTypes) {
-    
+    var result = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
+    if (result) {
+      this.cacheResult(result);
+      break;
+    }
   }
   console.assert(this.cache);
   this.interpolate(this.state.fraction);
-}
+};
 
 function applyInterpolations(environment, interpolations) {
   var first = interpolations[0];

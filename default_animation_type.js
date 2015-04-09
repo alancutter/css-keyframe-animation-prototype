@@ -7,10 +7,10 @@ function DefaultAnimationType(property) {
     maybeConvertPair: function(startKeyframe, endKeyframe) {
       return null;
     },
-    maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment) {
+    maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
       return null;
     },
-    maybeConvertSingleInEnvironment: function(keyframe, environment) {
+    maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
       return {
         invalidator: null,
         interpolableValue: [],
