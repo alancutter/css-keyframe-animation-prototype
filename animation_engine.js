@@ -35,14 +35,14 @@ function interpolate(time) {
 
 function apply() {
   for (var element of activeElements) {
-    var environment = new StyleResolverState(element);
+    var environment = new StyleEnvironment(element);
     var propertyInterpolations = {};
     for (var interpolation of element.interpolations) {
-      var property = interpolation.immutable.property;
+      var property = interpolation.immutable.applicableAnimationTypes[0].property;
       if (!(property in propertyInterpolations) || interpolation.mutable.underlyingFraction == 0) {
         propertyInterpolations[property] = [];
       }
-      propertyInterpolations[propertyInterpolations].push(interpolation);
+      propertyInterpolations[property].push(interpolation);
     }
     for (var property in propertyInterpolations) {
       applyInterpolations(environment, propertyInterpolations[property])

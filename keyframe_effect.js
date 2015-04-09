@@ -53,7 +53,6 @@ function KeyframeEffect(effectInput) {
         end: keyframes[i + 1].offset,
         duration: keyframes[i + 1].offset - keyframes[i].offset,
         interpolation: new Interpolation({
-          property: property,
           applicableAnimationTypes: getApplicableAnimationTypes(property),
           start: {
             value: keyframes[i].value,
@@ -68,9 +67,10 @@ function KeyframeEffect(effectInput) {
     }
   }
 }
+
 KeyframeEffect.prototype.getInterpolationsAt = function(fraction) {
   var interpolations = [];
-  for (var interpolationRecord in this.interpolationRecords) {
+  for (var interpolationRecord of this.interpolationRecords) {
     if (interpolationRecord.start > fraction || interpolationRecord.end <= fraction) {
       continue;
     }
@@ -81,53 +81,6 @@ KeyframeEffect.prototype.getInterpolationsAt = function(fraction) {
   return interpolations;
 }
 
-function Interpolation(immutableData) {
-  this.immutable = immutableData;
-  this.cache = null;
-  for (var animationType of this.immutable.applicableAnimationTypes) {
-    this.cache = animationType.maybeConvertStatic(this.immutable.start, this.immutable.end);
-    if (this.cache) {
-      break;
-    }
-  }
-  this.mutable = null;
-}
-
-function applyInterpolations(environment, interpolations) {
-  var first = interpolations[0];
-  var startingIndex = 1;
-  var underlyingValue;
-  if (first.mutable.underlyingFraction == 0) {
-    first.finalise(environment, null);
-    if (interpolations.length == 1) {
-      first.mutable.animationType.apply(environment, first.mutable.interpolableValue, first.mutable.nonInterpolableValue);
-      return;
-    }
-    underlyingValue = first.asUnderlyingValue();
-  } else {
-    startingIndex = 0;
-    underlyingValue = first.getUnderlyingValue(environment);
-  }
-  for (var i = startingIndex; i < interpolations.length; i++) {
-    var current = interpolations[i];
-    current.finalise(environment, underlyingValue);
-    if (current.mutable.animationType != underlyingValue.animationType) {
-      underlyingValue = current.asUnderlyingValue();
-    } else {
-      result = current.mutable.animationType.add(
-          underlyingValue.interpolableValue,
-          underlyingValue.nonInterpolableValue,
-          current.mutable.underlyingFraction,
-          current.mutable.interpolableValue,
-          current.mutable.nonInterpolableValue);
-      underlyingValue.interpolableValue = result.interpolableValue;
-      underlyingValue.nonInterpolableValue = result.nonInterpolableValue;
-    }
-  }
-  underlyingValue.animationType.apply(environment, underlyingValue.interpolableValue, underlyingValue.nonInterpolableValue);
-}
-
 window.KeyframeEffect = KeyframeEffect;
-window.applyInterpolations = applyInterpolations;
 
 })();
