@@ -23,25 +23,36 @@ div {
   color: green;
   transform: translate(10px, 10px) rotate(45deg);
 }
+
+#pants {
+  margin: 0px;
+  position: absolute;
+  left: auto;
+}
+
 </style>
 
-<div id="container">
+<!-- <div id="container">
   container
   <div id="target">target</div>
-</div>
+</div> -->
+<div id="pants">pants</div>
 
 <script>
-target.animate([
-  {transform: 'inherit', composite: 'accumulate'},
-  // Equivalent to:
-  // {transform: 'translate(10px, 10px) rotate(45deg)'},
-  // {transform: 'translate(20px, 20px) rotate(90deg)'},
-], 1000);
-target.animate([
-  {transform: 'inherit', composite: 'add'},
-  {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)', composite: 'replace'},
-  // Equivalent to:
-  // {transform: 'translate(10px, 10px) rotate(45deg)', composite: 'add'},
-  // {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)'},
+// target.animate([
+//   {transform: 'inherit', composite: 'accumulate'},
+//   // Equivalent to:
+//   // {transform: 'translate(10px, 10px) rotate(45deg)'},
+//   // {transform: 'translate(20px, 20px) rotate(90deg)'},
+// ], 1000);
+// target.animate([
+//   {transform: 'inherit', composite: 'add'},
+//   {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)', composite: 'replace'},
+//   // Equivalent to:
+//   // {transform: 'translate(10px, 10px) rotate(45deg)', composite: 'add'},
+//   // {transform: 'translate(10px, 10px) rotate(10deg) translate(10px, 10px) rotate(20deg)'},
+// ], 2000);
+pants.animate([
+  {'left': '100px', 'color': 'green'},
 ], 2000);
 </script>

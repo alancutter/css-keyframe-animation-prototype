@@ -11,7 +11,7 @@ function getApplicableAnimationTypes(property) {
         return [];
       }
     })();
-    propertyAnimationTypes[property].push(DefaultAnimationType(property));
+    propertyAnimationTypes[property].push(new DefaultAnimationType(property));
   }
   return propertyAnimationTypes[property];
 }

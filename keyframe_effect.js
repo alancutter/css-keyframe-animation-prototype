@@ -31,29 +31,15 @@ function KeyframeEffect(effectInput) {
   this.interpolationRecords = [];
   for (var property in propertyKeyframes) {
     var keyframes = propertyKeyframes[property];
-    // Adding neutral keyframes.
-    if (keyframes[0].offset != 0) {
-      keyframes.splice(0, 0, {
-        offset: 0,
-        composite: 'add',
-        value: null,
-      });
-    }
-    if (keyframes[keyframes.length - 1].offset != 1) {
-      keyframes.splice(keyframes.length, 0, {
-        offset: 1,
-        composite: 'add',
-        value: null,
-      });
-    }
+    var applicableAnimationTypes = getApplicableAnimationTypes(property);
     // Create Interpolations.
     for (var i = 0; i < keyframes.length - 1; i++) {
       this.interpolationRecords.push({
-        start: keyframes[i].offset,
-        end: keyframes[i + 1].offset,
+        startOffset: keyframes[i].offset,
+        endOffset: keyframes[i + 1].offset,
         duration: keyframes[i + 1].offset - keyframes[i].offset,
         interpolation: new Interpolation({
-          applicableAnimationTypes: getApplicableAnimationTypes(property),
+          animationTypes: applicableAnimationTypes,
           start: {
             value: keyframes[i].value,
             composite: keyframes[i].composite,
@@ -65,16 +51,63 @@ function KeyframeEffect(effectInput) {
         }),
       });
     }
+    // Adding neutral keyframes.
+    if (keyframes.length == 1) {
+      this.interpolationRecords.push({
+        startOffset: 0,
+        endOffset: 1,
+        duration: 1,
+        interpolation: new Interpolation({
+          animationTypes: applicableAnimationTypes,
+          start: null,
+          end: {
+            value: keyframes[0].value,
+            composite: keyframes[0].composite,
+          },
+        }),
+      });
+    } else {
+      if (keyframes[0].offset !== 0) {
+        this.interpolationRecords.push({
+          startOffset: 0,
+          endOffset: keyframes[0].offset,
+          duration: keyframes[0].offset,
+          interpolation: new Interpolation({
+            animationTypes: applicableAnimationTypes,
+            start: null,
+            end: {
+              value: keyframes[0].value,
+              composite: keyframes[0].composite,
+            },
+          }),
+        });
+      }
+      if (lastElement(keyframes).offset != 1) {
+        this.interpolationRecords.push({
+          startOffset: lastElement(keyframes).offset,
+          endOffset: 1,
+          duration: 1 - lastElement(keyframes).offset,
+          interpolation: new Interpolation({
+            animationTypes: applicableAnimationTypes,
+            start: {
+              value: lastElement(keyframes).value,
+              composite: lastElement(keyframes).composite,
+            },
+            end: null,
+          }),
+        });
+      }
+    }
   }
 }
 
 KeyframeEffect.prototype.getInterpolationsAt = function(fraction) {
   var interpolations = [];
   for (var interpolationRecord of this.interpolationRecords) {
-    if (interpolationRecord.start > fraction || interpolationRecord.end <= fraction) {
+    if (interpolationRecord.startOffset > fraction || interpolationRecord.endOffset <= fraction) {
       continue;
     }
-    var subFraction = (fraction - interpolationRecord.start) / interpolationRecord.duration;
+    var subFraction = (fraction - interpolationRecord.startOffset) / interpolationRecord.duration;
     interpolationRecord.interpolation.interpolate(subFraction);
     interpolations.push(interpolationRecord.interpolation);
   }

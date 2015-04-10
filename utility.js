@@ -1,6 +1,10 @@
 (function() {
 'use strict';
 
+function lastElement(array) {
+  return array[array.length - 1];
+}
+
 function lerp(a, b, fraction) {
   console.assert(a instanceof Array === b instanceof Array);
   if (fraction === 0) {
@@ -17,11 +21,12 @@ function lerp(a, b, fraction) {
   return a * (1 - fraction) + b * fraction;
 }
 
-function underlyingFractionForComposite(composite) {
-  return composite == 'replace' ? 0 : 1;
+function underlyingFractionForkeyframe(keyframe) {
+  return !keyframe ? 1 : (keyframe.composite == 'replace' ? 0 : 1);
 }
 
+window.lastElement = lastElement;
 window.lerp = lerp;
-window.underlyingFractionForComposite = underlyingFractionForComposite;
+window.underlyingFractionForkeyframe = underlyingFractionForkeyframe;
 
 })();

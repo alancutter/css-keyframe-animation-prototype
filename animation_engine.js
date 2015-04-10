@@ -38,8 +38,8 @@ function apply() {
     var environment = new StyleEnvironment(element);
     var propertyInterpolations = {};
     for (var interpolation of element.interpolations) {
-      var property = interpolation.immutable.applicableAnimationTypes[0].property;
-      if (!(property in propertyInterpolations) || interpolation.mutable.underlyingFraction == 0) {
+      var property = interpolation.immutable.animationTypes[0].property;
+      if (!(property in propertyInterpolations) || interpolation.state.underlyingFraction == 0) {
         propertyInterpolations[property] = [];
       }
       propertyInterpolations[property].push(interpolation);

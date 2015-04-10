@@ -14,7 +14,7 @@ function DefaultAnimationType(property) {
       return {
         invalidator: null,
         interpolableValue: [],
-        nonInterpolableValue: keyframe.value,
+        nonInterpolableValue: keyframe ? keyframe.value : null,
       };
     },
     interpolate: lerp,
@@ -22,6 +22,11 @@ function DefaultAnimationType(property) {
       return null;
     },
     add: null,
+    apply: function(interpolableValue, nonInterpolableValue, environment) {
+      if (nonInterpolableValue) {
+        environment.set(property, nonInterpolableValue);
+      }
+    },
   };
 };
 

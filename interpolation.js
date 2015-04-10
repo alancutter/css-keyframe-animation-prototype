@@ -13,7 +13,7 @@ function Interpolation(immutableData) {
   }
   this.state = {
     fraction: 0,
-    underlyingFraction: underlyingFractionForComposite(this.immutable.start.composite),
+    underlyingFraction: underlyingFractionForkeyframe(this.immutable.start),
     animationType: null,
     interpolableValue: null,
     nonInterpolableValue: null,
@@ -23,16 +23,12 @@ function Interpolation(immutableData) {
 Interpolation.prototype.cachePair = function(pair) {
   this.cache = {
     start: {
-      animationType: animationType,
       invalidator: pair.start.invalidator,
-      interpolableValue: pair.start.interpolableValue,
-      nonInterpolableValue: pair.start.nonInterpolableValue,
+      interpolationValue: pair.start.interpolationValue,
     },
     end: {
-      animationType: animationType,
       invalidator: pair.end.invalidator,
-      interpolableValue: pair.end.interpolableValue,
-      nonInterpolableValue: pair.end.nonInterpolableValue,
+      interpolationValue: pair.end.interpolationValue,
     },
   };
 };
@@ -40,8 +36,8 @@ Interpolation.prototype.cachePair = function(pair) {
 Interpolation.prototype.interpolate = function(fraction) {
   this.state.fraction = fraction;
   this.state.underlyingFraction = lerp(
-      underlyingFractionForComposite(this.immutable.start.composite),
-      underlyingFractionForComposite(this.immutable.end.composite),
+      underlyingFractionForkeyframe(this.immutable.start),
+      underlyingFractionForkeyframe(this.immutable.end),
       fraction);
   if (!this.cache) {
     this.state.animationType = null;
@@ -49,9 +45,9 @@ Interpolation.prototype.interpolate = function(fraction) {
     this.state.nonInterpolableValue = null;
     return;
   }
-  var start = this.cache.start;
-  var end = this.cache.end;
-  if (start.animationType === end.animationType && start.nonInterpolableValue == end.nonInterpolableValue) {
+  var start = this.cache.start.interpolationValue;
+  var end = this.cache.end.interpolationValue;
+  if (start && end && start.animationType === end.animationType && start.nonInterpolableValue == end.nonInterpolableValue) {
     this.state.animationType = start.animationType;
     this.state.interpolableValue = start.animationType.interpolate(start.interpolableValue, end.interpolableValue, fraction);
     this.state.nonInterpolableValue = start.nonInterpolableValue;
@@ -85,8 +81,6 @@ Interpolation.prototype.asUnderlyingValue = function() {
 Interpolation.prototype.isInterpolated = function() {
   var isInterpolated = this.state.animationType !== null;
   console.assert(isInterpolated == (this.cache !== null));
-  console.assert(isInterpolated == (this.state.interpolableValue !== null));
-  console.assert(isInterpolated == (this.state.nonInterpolableValue !== null));
   return isInterpolated;
 };
 
@@ -108,8 +102,8 @@ Interpolation.prototype.ensureInterpolated = function(environment, underlyingVal
     this.cache = {};
     for (var side of ['start', 'end']) {
       var keyframe = this.immutable[side];
-      for (var animationType in this.immutable.animationTypes) {
-        var result = animationType.convertSingleInEnvironment(keyframe, environment, underlyingValue);
+      for (var animationType of this.immutable.animationTypes) {
+        var result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
         if (result) {
           this.cache[side] = {
             animationType: animationType,
@@ -134,7 +128,7 @@ function applyInterpolations(environment, interpolations) {
   if (first.state.underlyingFraction == 0) {
     first.ensureInterpolated(environment, null);
     if (interpolations.length == 1) {
-      first.state.animationType.apply(environment, first.state.interpolableValue, first.state.nonInterpolableValue);
+      first.state.animationType.apply(first.state.interpolableValue, first.state.nonInterpolableValue, environment);
       return;
     }
     underlyingValue = first.asUnderlyingValue();
@@ -145,7 +139,7 @@ function applyInterpolations(environment, interpolations) {
   for (var i = startingIndex; i < interpolations.length; i++) {
     var current = interpolations[i];
     current.ensureInterpolated(environment, underlyingValue);
-    if (current.state.animationType != underlyingValue.animationType || !current.state.animationType.add) {
+    if (!underlyingValue || current.state.animationType != underlyingValue.animationType || !current.state.animationType.add) {
       underlyingValue = current.asUnderlyingValue();
     } else {
       result = current.state.animationType.add(
@@ -158,7 +152,7 @@ function applyInterpolations(environment, interpolations) {
       underlyingValue.nonInterpolableValue = result.nonInterpolableValue;
     }
   }
-  underlyingValue.animationType.apply(environment, underlyingValue.interpolableValue, underlyingValue.nonInterpolableValue);
+  underlyingValue.animationType.apply(underlyingValue.interpolableValue, underlyingValue.nonInterpolableValue, environment);
 }
 
 window.Interpolation = Interpolation;
