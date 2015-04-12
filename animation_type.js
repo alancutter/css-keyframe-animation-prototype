@@ -16,6 +16,6 @@ function getApplicableAnimationTypes(property) {
   return propertyAnimationTypes[property];
 }
 
-window.getApplicableAnimationTypes = getApplicableAnimationTypes;
+this.getApplicableAnimationTypes = getApplicableAnimationTypes;
 
 })();

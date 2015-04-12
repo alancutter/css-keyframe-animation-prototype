@@ -10,6 +10,6 @@ StyleEnvironment.prototype.set = function(property, value) {
   this.element.style[property] = value;
 };
 
-window.StyleEnvironment = StyleEnvironment;
+this.StyleEnvironment = StyleEnvironment;
 
 })();

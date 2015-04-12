@@ -30,6 +30,6 @@ function DefaultAnimationType(property) {
   };
 };
 
-window.DefaultAnimationType = DefaultAnimationType;
+this.DefaultAnimationType = DefaultAnimationType;
 
 })();

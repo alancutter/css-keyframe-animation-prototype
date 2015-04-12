@@ -103,6 +103,7 @@ Interpolation.prototype.ensureInterpolated = function(environment, underlyingVal
     this.cache = {};
     for (var side of ['start', 'end']) {
       var keyframe = this.immutable[side];
+      var 
       for (var animationType of this.immutable.animationTypes) {
         var result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
         if (result) {
@@ -161,7 +162,7 @@ function applyInterpolations(environment, interpolations) {
   }
 }
 
-window.Interpolation = Interpolation;
-window.applyInterpolations = applyInterpolations;
+this.Interpolation = Interpolation;
+this.applyInterpolations = applyInterpolations;
 
 })();
