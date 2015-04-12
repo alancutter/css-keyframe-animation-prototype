@@ -25,8 +25,8 @@ function underlyingFractionForkeyframe(keyframe) {
   return !keyframe ? 1 : (keyframe.composite == 'replace' ? 0 : 1);
 }
 
-this.lastElement = lastElement;
-this.lerp = lerp;
-this.underlyingFractionForkeyframe = underlyingFractionForkeyframe;
+window.lastElement = lastElement;
+window.lerp = lerp;
+window.underlyingFractionForkeyframe = underlyingFractionForkeyframe;
 
 })();

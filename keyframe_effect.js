@@ -114,6 +114,6 @@ KeyframeEffect.prototype.getInterpolationsAt = function(fraction) {
   return interpolations;
 }
 
-this.KeyframeEffect = KeyframeEffect;
+window.KeyframeEffect = KeyframeEffect;
 
 })();

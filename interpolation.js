@@ -172,7 +172,7 @@ function applyInterpolations(environment, interpolations) {
   }
 }
 
-this.Interpolation = Interpolation;
-this.applyInterpolations = applyInterpolations;
+window.Interpolation = Interpolation;
+window.applyInterpolations = applyInterpolations;
 
 })();
