@@ -49,18 +49,16 @@ Interpolation.prototype.interpolate = function(fraction) {
     this.state.animationValue = null;
     return;
   }
-  var start = this.cache.start;
-  var end = this.cache.end;
-  if (start && end && start.animationType === end.animationType && start.nonInterpolableValue == end.nonInterpolableValue) {
-    var startValue = start.animationValue;
-    var endValue = end.animationValue;
+  var startValue = this.cache.start.animationValue;
+  var endValue = this.cache.end.animationValue;
+  if (startValue && endValue && startValue.animationType === endValue.animationType && startValue.nonInterpolableValue == endValue.nonInterpolableValue) {
     this.state.animationValue = {
       animationType: startValue.animationType,
       interpolableValue: startValue.animationType.interpolate(startValue.interpolableValue, endValue.interpolableValue, fraction),
       nonInterpolableValue: startValue.nonInterpolableValue,
     };
   } else {
-    this.state.animationValue = fraction < 0.5 ? start : end;
+    this.state.animationValue = fraction < 0.5 ? startValue : endValue;
   }
 };
 

@@ -11,11 +11,14 @@ function DefaultAnimationType(property) {
       return null;
     },
     maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
-      return {
-        invalidator: null,
-        interpolableValue: [],
-        nonInterpolableValue: keyframe ? keyframe.value : null,
-      };
+      if (keyframe) {
+        return {
+          invalidator: null,
+          interpolableValue: [],
+          nonInterpolableValue: keyframe.value,
+        };
+      }
+      return null;
     },
     interpolate: lerp,
     maybeConvertEnvironment: function(environment) {
@@ -23,9 +26,7 @@ function DefaultAnimationType(property) {
     },
     add: null,
     apply: function(interpolableValue, nonInterpolableValue, environment) {
-      if (nonInterpolableValue) {
-        environment.set(property, nonInterpolableValue);
-      }
+      environment.set(property, nonInterpolableValue);
     },
   };
 };
