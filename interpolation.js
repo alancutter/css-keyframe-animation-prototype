@@ -14,7 +14,7 @@ function Interpolation(immutableData) {
   this.state = {
     fraction: 0,
     underlyingFraction: underlyingFractionForkeyframe(this.immutable.start),
-    interpolableValue: null,
+    animationValue: null,
   };
 }
 
@@ -80,18 +80,19 @@ Interpolation.prototype.asUnderlyingValue = function() {
 };
 
 Interpolation.prototype.isInterpolated = function() {
-  var isInterpolated = this.state.animationValue !== null;
-  console.assert(isInterpolated == (this.cache !== null));
+  var isInterpolated = this.state.animationValue != null;
+  console.assert(isInterpolated == (this.cache != null));
   return isInterpolated;
 };
 
-Interpolation.prototype.ensureInterpolated = function(environment, underlyingValue) {
+Interpolation.prototype.environmentChanged = function(environment, underlyingValue) {
   var needsReconversion = (this.cache == null
     || (this.cache.start.invalidator && this.cache.start.invalidator(environment, underlyingValue))
     || (this.cache.end.invalidator && this.cache.end.invalidator(environment, underlyingValue)));
   if (!needsReconversion && this.isInterpolated()) {
     return;
   }
+  this.cache = null;
   for (var animationType of this.immutable.animationTypes) {
     var resultPair = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
     if (resultPair) {
@@ -103,20 +104,28 @@ Interpolation.prototype.ensureInterpolated = function(environment, underlyingVal
     this.cache = {};
     for (var side of ['start', 'end']) {
       var keyframe = this.immutable[side];
-      var 
+      var result = null;
       for (var animationType of this.immutable.animationTypes) {
-        var result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
+        result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
         if (result) {
-          this.cache[side] = {
-            animationType: animationType,
-            invalidator: result.invalidator,
-            interpolableValue: result.interpolableValue,
-            nonInterpolableValue: result.nonInterpolableValue,
-          };
           break;
         }
       }
-      console.assert(this.cache[side]);
+      if (result) {
+        this.cache[side] = {
+          invalidator: result.invalidator,
+          animationValue: {
+            animationType: animationType,
+            interpolableValue: result.interpolableValue,
+            nonInterpolableValue: result.nonInterpolableValue,
+          },
+        };
+      } else {
+        this.cache[side] = {
+          invalidator: function() {return true;},
+          animationValue: null,
+        };
+      }
     }
   }
   console.assert(this.cache);
@@ -124,23 +133,24 @@ Interpolation.prototype.ensureInterpolated = function(environment, underlyingVal
 };
 
 function applyInterpolations(environment, interpolations) {
-  var first = interpolations[0];
-  var startingIndex = 1;
-  var underlyingValue;
+  var underlyingValue = null;
+  var startingIndex = 0;
+  var first = interpolations[startingIndex];
   if (first.state.underlyingFraction == 0) {
-    first.ensureInterpolated(environment, null);
+    first.environmentChanged(environment, null);
     if (interpolations.length == 1) {
-      first.state.animationType.apply(first.state.interpolableValue, first.state.nonInterpolableValue, environment);
+      var firstValue = first.state.animationValue;
+      if (firstValue) {
+        firstValue.animationType.apply(firstValue.interpolableValue, firstValue.nonInterpolableValue, environment);
+      }
       return;
     }
     underlyingValue = first.asUnderlyingValue();
-  } else {
-    startingIndex = 0;
-    underlyingValue = first.getUnderlyingValue(environment);
+    startingIndex++;
   }
   for (var i = startingIndex; i < interpolations.length; i++) {
     var current = interpolations[i];
-    current.ensureInterpolated(environment, underlyingValue);
+    current.environmentChanged(environment, underlyingValue);
     var currentValue = current.state.animationValue;
     if (!currentValue) {
       continue;
