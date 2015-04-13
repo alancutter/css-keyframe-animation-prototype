@@ -2,6 +2,7 @@
 'use strict';
 
 var activeElements = [];
+var now = performance.now();
 
 function Animation(startTime, effect, duration) {
   this.startTime = startTime;
@@ -20,7 +21,7 @@ Element.prototype.animate = function(effectInput, duration) {
   if (!this.animations) {
     this.animations = [];
   }
-  this.animations.push(new Animation(performance.now(), new KeyframeEffect(effectInput), duration));
+  this.animations.push(new Animation(now, new KeyframeEffect(effectInput), duration));
   activeElements.push(this);
 };
 
@@ -51,6 +52,7 @@ function apply() {
 }
 
 requestAnimationFrame(function frame(time) {
+  now = time;
   interpolate(time);
   apply();
   requestAnimationFrame(frame);

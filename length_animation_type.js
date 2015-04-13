@@ -3,27 +3,23 @@
 
 function LengthAnimationType(property) {
   return {
+    name: 'length',
     property: property,
-    maybeConvertPair: function(startKeyframe, endKeyframe) {
-      var start = this._maybeConvertSingle(startKeyframe);
-      var end = this._maybeConvertSingle(endKeyframe);
-      if (!start || !end) {
-        return null;
-      }
-    },
     _maybeConvertSingle: function(keyframe) {
       if (!keyframe) {
         return {
           invalidator: function(environment, underlyingValue) {
-            return underlyingValue
-          }
-        }
+            return underlyingValue.animationType != this;
+          },
+          interpolableValue: 0,
+          nonInterpolableValue: null,
+        };
       }
-      var match = /(.*)px/.exec(value);
+      var match = /(.*)px/.exec(keyframe.value);
       if (!match) {
         return null;
       }
-      var number = Number(match[0]);
+      var number = Number(match[1]);
       if (isNaN(number)) {
         return null;
       }
@@ -33,30 +29,39 @@ function LengthAnimationType(property) {
         nonInterpolableValue: null,
       };
     },
+    maybeConvertPair: function(startKeyframe, endKeyframe) {
+      var start = this._maybeConvertSingle(startKeyframe);
+      var end = this._maybeConvertSingle(endKeyframe);
+      if (!start || !end) {
+        return null;
+      }
+      return {
+        start: start,
+        end: end,
+      };
+    },
     maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
       return null;
     },
     maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
-      if (keyframe) {
-        return {
-          invalidator: null,
-          interpolableValue: [],
-          nonInterpolableValue: keyframe.value,
-        };
-      }
-      return null;
+      return this._maybeConvertSingle(keyframe);
     },
     interpolate: lerp,
     maybeConvertEnvironment: function(environment) {
       return null;
     },
-    add: null,
+    add: function(underlyingInterpolableValue, underlyingNonInterpolableValue, underlyingFraction, interpolableValue, nonInterpolableValue) {
+      return {
+        interpolableValue: underlyingInterpolableValue * underlyingFraction + interpolableValue,
+        nonInterpolableValue: nonInterpolableValue,
+      };
+    },
     apply: function(interpolableValue, nonInterpolableValue, environment) {
-      environment.set(property, nonInterpolableValue);
+      environment.set(property, interpolableValue + 'px');
     },
   };
 };
 
-window.DefaultAnimationType = DefaultAnimationType;
+window.LengthAnimationType = LengthAnimationType;
 
 })();

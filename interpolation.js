@@ -19,6 +19,7 @@ function Interpolation(immutableData) {
 }
 
 Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
+  console.log('cached pair', animationType.name);
   this.cache = {
     start: {
       invalidator: resultPair.start.invalidator,
@@ -72,11 +73,6 @@ Interpolation.prototype.getUnderlyingValue = function(environment) {
   return null;
 };
 
-Interpolation.prototype.asUnderlyingValue = function() {
-  console.assert(this.cache);
-  return this.state.animationValue;
-};
-
 Interpolation.prototype.isInterpolated = function() {
   var isInterpolated = this.state.animationValue != null;
   console.assert(isInterpolated == (this.cache != null));
@@ -110,6 +106,7 @@ Interpolation.prototype.environmentChanged = function(environment, underlyingVal
         }
       }
       if (result) {
+        console.log('cached', side, animationType.name);
         this.cache[side] = {
           invalidator: result.invalidator,
           animationValue: {
@@ -143,7 +140,7 @@ function applyInterpolations(environment, interpolations) {
       }
       return;
     }
-    underlyingValue = first.asUnderlyingValue();
+    underlyingValue = first.state.animationValue;
     startingIndex++;
   }
   for (var i = startingIndex; i < interpolations.length; i++) {
@@ -153,16 +150,19 @@ function applyInterpolations(environment, interpolations) {
     if (!currentValue) {
       continue;
     } else if (!underlyingValue || currentValue.animationType != underlyingValue.animationType || !currentValue.animationType.add) {
-      underlyingValue = current.asUnderlyingValue();
+      underlyingValue = current.state.animationValue;
     } else {
-      result = currentValue.animationType.add(
+      var result = currentValue.animationType.add(
           underlyingValue.interpolableValue,
           underlyingValue.nonInterpolableValue,
-          currentValue.underlyingFraction,
+          current.state.underlyingFraction,
           currentValue.interpolableValue,
           currentValue.nonInterpolableValue);
-      underlyingValue.interpolableValue = result.interpolableValue;
-      underlyingValue.nonInterpolableValue = result.nonInterpolableValue;
+      underlyingValue = {
+        animationType: currentValue.animationType,
+        interpolableValue: result.interpolableValue,
+        nonInterpolableValue: result.nonInterpolableValue,
+      };
     }
   }
   if (underlyingValue) {

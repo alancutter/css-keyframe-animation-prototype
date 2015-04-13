@@ -1,10 +1,12 @@
+<script src="animation_engine.js"></script>
 <script src="test_animation_engine.js"></script>
 <script src="utility.js"></script>
 <script src="style_environment.js"></script>
 <script src="keyframe_effect.js"></script>
 <script src="interpolation.js"></script>
-<script src="animation_type.js"></script>
+<script src="animation_type_mapping.js"></script>
 <script src="default_animation_type.js"></script>
+<script src="length_animation_type.js"></script>
 
 <style>
 .target {
@@ -16,28 +18,45 @@
 .change {
   left: 0px;
 }
+
+#pants {
+  width: 100px;
+  position: absolute;
+  border: solid;
+}
 </style>
+
+<div id="pants">pants</div>
 
 <body>
 <script>
-testResponsiveInterpolation({
-  property: 'left',
-  start: null,
-  end: {value: '100px', composite: 'replace'},
-  expectBefore: [
-    {at: 0, is: 'auto'},
-    {at: 0.25, is: 'auto'},
-    {at: 0.5, is: '100px'},
-    {at: 0.75, is: '100px'},
-    {at: 0.9, is: '100px'},
-  ],
-  expectAfter: [
-    {at: 0, is: '0px'},
-    {at: 0.25, is: '25px'},
-    {at: 0.5, is: '50px'},
-    {at: 0.75, is: '75px'},
-    {at: 0.9, is: '90px'},
-  ],
-});
+pants.animate([
+  {left: 'auto'},
+  {left: '100px'},
+], 2000);
+pants.animate([
+  {left: '0px', composite: 'add'},
+  {left: '100px', composite: 'add'},
+], 2000);
+
+// testResponsiveInterpolation({
+//   property: 'left',
+//   start: null,
+//   end: {value: '100px', composite: 'replace'},
+//   expectBefore: [
+//     {at: 0, is: 'auto'},
+//     {at: 0.25, is: 'auto'},
+//     {at: 0.5, is: '100px'},
+//     {at: 0.75, is: '100px'},
+//     {at: 0.9, is: '100px'},
+//   ],
+//   expectAfter: [
+//     {at: 0, is: '0px'},
+//     {at: 0.25, is: '25px'},
+//     {at: 0.5, is: '50px'},
+//     {at: 0.75, is: '75px'},
+//     {at: 0.9, is: '90px'},
+//   ],
+// });
 </script>
 </body>

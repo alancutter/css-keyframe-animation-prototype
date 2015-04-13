@@ -3,6 +3,7 @@
 
 function DefaultAnimationType(property) {
   return {
+    name: 'default',
     property: property,
     maybeConvertPair: function(startKeyframe, endKeyframe) {
       return null;
