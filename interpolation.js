@@ -84,10 +84,10 @@ Interpolation.prototype.isInterpolated = function() {
 };
 
 Interpolation.prototype.environmentChanged = function(environment, underlyingValue) {
-  var needsReconversion = (this.cache == null
-    || (this.cache.start.invalidator && this.cache.start.invalidator(environment, underlyingValue))
-    || (this.cache.end.invalidator && this.cache.end.invalidator(environment, underlyingValue)));
-  if (!needsReconversion && this.isInterpolated()) {
+  var isCacheValid = (this.cache != null
+      && (!this.cache.start.invalidator || !this.cache.start.invalidator(environment, underlyingValue))
+      && (!this.cache.end.invalidator || !this.cache.end.invalidator(environment, underlyingValue)));
+  if (isCacheValid) {
     return;
   }
   this.cache = null;

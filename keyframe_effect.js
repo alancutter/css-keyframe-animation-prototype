@@ -2,6 +2,7 @@
 'use strict';
 
 function KeyframeEffect(effectInput) {
+  // FIXME: Support [{offset: 0}].
   var propertyKeyframes = {};
   effectInput.forEach(function(keyframe, i) {
     // Offset distribution.
