@@ -25,8 +25,13 @@ function underlyingFractionForkeyframe(keyframe) {
   return !keyframe ? 1 : (keyframe.composite == 'replace' ? 0 : 1);
 }
 
+function isNeutralKeyframe(keyframe) {
+  return keyframe == null;
+}
+
 window.lastElement = lastElement;
 window.lerp = lerp;
 window.underlyingFractionForkeyframe = underlyingFractionForkeyframe;
+window.isNeutralKeyframe = isNeutralKeyframe;
 
 })();

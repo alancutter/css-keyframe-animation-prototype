@@ -1,9 +1,9 @@
 (function() {
 'use strict';
 
-function LengthAnimationType(property) {
+function NumberAnimationType(property) {
   return {
-    name: 'length',
+    name: 'number',
     property: property,
     _maybeConvertSingle: function(keyframe) {
       if (!keyframe) {
@@ -15,11 +15,7 @@ function LengthAnimationType(property) {
           nonInterpolableValue: null,
         };
       }
-      var match = /(.*)px/.exec(keyframe.value);
-      if (!match) {
-        return null;
-      }
-      var number = Number(match[1]);
+      var number = Number(keyframe.value);
       if (isNaN(number)) {
         return null;
       }
@@ -44,7 +40,7 @@ function LengthAnimationType(property) {
       };
     },
     maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
-      return null;
+      return this.maybeConvertPair(startKeyframe, endKeyframe);
     },
     maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
       return this._maybeConvertSingle(keyframe);
@@ -60,11 +56,11 @@ function LengthAnimationType(property) {
       };
     },
     apply: function(interpolableValue, nonInterpolableValue, environment) {
-      environment.set(property, interpolableValue + 'px');
+      environment.set(property, interpolableValue);
     },
   };
 };
 
-window.LengthAnimationType = LengthAnimationType;
+window.NumberAnimationType = NumberAnimationType;
 
 })();

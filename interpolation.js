@@ -14,6 +14,7 @@ function Interpolation(immutableData) {
   this.state = {
     fraction: 0,
     underlyingFraction: underlyingFractionForkeyframe(this.immutable.start),
+    isNeutral: isNeutralKeyframe(this.immutable.start),
     animationValue: null,
   };
 }
@@ -22,7 +23,7 @@ Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
   console.log('cached pair', animationType.name);
   this.cache = {
     start: {
-      invalidator: resultPair.start.invalidator,
+      isInvalid: resultPair.start.isInvalid,
       animationValue: {
         animationType: animationType,
         interpolableValue: resultPair.start.interpolableValue,
@@ -30,7 +31,7 @@ Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
       },
     },
     end: {
-      invalidator: resultPair.end.invalidator,
+      isInvalid: resultPair.end.isInvalid,
       animationValue: {
         animationType: animationType,
         interpolableValue: resultPair.end.interpolableValue,
@@ -46,6 +47,7 @@ Interpolation.prototype.interpolate = function(fraction) {
       underlyingFractionForkeyframe(this.immutable.start),
       underlyingFractionForkeyframe(this.immutable.end),
       fraction);
+  this.state.isNeutral = isNeutralKeyframe(fraction < 0.5 ? this.immutable.start : this.immutable.end);
   if (!this.cache) {
     this.state.animationValue = null;
     return;
@@ -80,14 +82,19 @@ Interpolation.prototype.isInterpolated = function() {
 };
 
 Interpolation.prototype.environmentChanged = function(environment, underlyingValue) {
-  var isCacheValid = (this.cache != null
-      && (!this.cache.start.invalidator || !this.cache.start.invalidator(environment, underlyingValue))
-      && (!this.cache.end.invalidator || !this.cache.end.invalidator(environment, underlyingValue)));
-  if (isCacheValid) {
-    return;
+  if (this.cache != null) {
+    if (!this.cache.start.isInvalid || !this.cache.start.isInvalid(environment, underlyingValue)) {
+      if (!this.cache.end.isInvalid || !this.cache.end.isInvalid(environment, underlyingValue)) {
+        return;
+      }
+    }
   }
   this.cache = null;
+  var hasNeutral = isNeutralKeyframe(this.immutable.start) || isNeutralKeyframe(this.immutable.end);
   for (var animationType of this.immutable.animationTypes) {
+    if (hasNeutral && underlyingValue && underlyingValue.animationType != animationType) {
+      continue;
+    }
     var resultPair = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
     if (resultPair) {
       this.cacheResultPair(resultPair);
@@ -99,16 +106,17 @@ Interpolation.prototype.environmentChanged = function(environment, underlyingVal
     for (var side of ['start', 'end']) {
       var keyframe = this.immutable[side];
       var result = null;
-      for (var animationType of this.immutable.animationTypes) {
-        result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
-        if (result) {
-          break;
+      if (!isNeutralKeyframe(keyframe)) {
+        for (var animationType of this.immutable.animationTypes) {
+          result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
+          if (result) {
+            break;
+          }
         }
       }
       if (result) {
-        console.log('cached', side, animationType.name);
         this.cache[side] = {
-          invalidator: result.invalidator,
+          isInvalid: result.isInvalid,
           animationValue: {
             animationType: animationType,
             interpolableValue: result.interpolableValue,
@@ -117,7 +125,7 @@ Interpolation.prototype.environmentChanged = function(environment, underlyingVal
         };
       } else {
         this.cache[side] = {
-          invalidator: function() {return true;},
+          isInvalid: function() {return true;},
           animationValue: null,
         };
       }
@@ -145,13 +153,15 @@ function applyInterpolations(environment, interpolations) {
   }
   for (var i = startingIndex; i < interpolations.length; i++) {
     var current = interpolations[i];
+    if (!underlyingValue) {
+      underlyingValue = current.getUnderlyingValue(environment);
+    }
     current.environmentChanged(environment, underlyingValue);
     var currentValue = current.state.animationValue;
     if (!currentValue) {
       continue;
-    } else if (!underlyingValue || currentValue.animationType != underlyingValue.animationType || !currentValue.animationType.add) {
-      underlyingValue = current.state.animationValue;
-    } else {
+    }
+    if (underlyingValue && currentValue.animationType == underlyingValue.animationType && currentValue.animationType.add) {
       var result = currentValue.animationType.add(
           underlyingValue.interpolableValue,
           underlyingValue.nonInterpolableValue,
@@ -163,6 +173,8 @@ function applyInterpolations(environment, interpolations) {
         interpolableValue: result.interpolableValue,
         nonInterpolableValue: result.nonInterpolableValue,
       };
+    } else if (!current.state.isNeutral) {
+      underlyingValue = currentValue;
     }
   }
   if (underlyingValue) {

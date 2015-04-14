@@ -14,7 +14,7 @@ function DefaultAnimationType(property) {
     maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
       if (keyframe) {
         return {
-          invalidator: null,
+          isInvalid: null,
           interpolableValue: [],
           nonInterpolableValue: keyframe.value,
         };

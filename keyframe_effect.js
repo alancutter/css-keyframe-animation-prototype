@@ -2,7 +2,6 @@
 'use strict';
 
 function KeyframeEffect(effectInput) {
-  // FIXME: Support [{offset: 0}].
   var propertyKeyframes = {};
   effectInput.forEach(function(keyframe, i) {
     // Offset distribution.
@@ -15,6 +14,7 @@ function KeyframeEffect(effectInput) {
     var composite = keyframe.composite || 'replace';
     // Property grouping.
     for (var property in keyframe) {
+      // FIXME: Support offsets.
       console.assert(property !== 'offset', 'explicit offsets not supported');
       if (property == 'composite') {
         continue;

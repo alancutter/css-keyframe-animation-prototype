@@ -7,6 +7,8 @@ function getApplicableAnimationTypes(property) {
   if (!(property in propertyAnimationTypes)) {
     propertyAnimationTypes[property] = (function() {
       switch (property) {
+      case 'line-height':
+        return [LengthAnimationType(property), NumberAnimationType(property)];
       case 'bottom':
       case 'left':
       case 'right':

@@ -7,6 +7,7 @@
 <script src="animation_type_mapping.js"></script>
 <script src="default_animation_type.js"></script>
 <script src="length_animation_type.js"></script>
+<script src="number_animation_type.js"></script>
 
 <style>
 .target {
@@ -23,6 +24,7 @@
   width: 100px;
   position: absolute;
   border: solid;
+  left: auto;
 }
 </style>
 
@@ -31,31 +33,37 @@
 <body>
 <script>
 pants.animate([
-  {left: 'auto'},
-  {left: '100px'},
+  {'line-height': '1'},
+  {'line-height': '1'},
 ], 2000);
 pants.animate([
-  {left: '0px', composite: 'add'},
-  {left: '100px', composite: 'add'},
+  {'line-height': '50px'},
+], 2000);
+pants.animate([
+  {'line-height': '5', composite: 'add'},
 ], 2000);
 
 // testResponsiveInterpolation({
 //   property: 'left',
 //   start: null,
 //   end: {value: '100px', composite: 'replace'},
+//   underlying: 'auto',
+//   change: {
+//     underlying: '100px'
+//   },
 //   expectBefore: [
 //     {at: 0, is: 'auto'},
 //     {at: 0.25, is: 'auto'},
 //     {at: 0.5, is: '100px'},
 //     {at: 0.75, is: '100px'},
-//     {at: 0.9, is: '100px'},
+//     {at: 1, is: '100px'},
 //   ],
 //   expectAfter: [
-//     {at: 0, is: '0px'},
-//     {at: 0.25, is: '25px'},
-//     {at: 0.5, is: '50px'},
-//     {at: 0.75, is: '75px'},
-//     {at: 0.9, is: '90px'},
+//     {at: 0, is: '100px'},
+//     {at: 0.25, is: '125px'},
+//     {at: 0.5, is: '150px'},
+//     {at: 0.75, is: '175px'},
+//     {at: 1, is: '200px'},
 //   ],
 // });
 </script>
