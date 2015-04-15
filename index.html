@@ -20,51 +20,29 @@
   left: 0px;
 }
 
-#pants {
-  width: 100px;
+#test {
+  width: 400px;
   position: absolute;
   border: solid;
   left: auto;
+  line-height: 1;
 }
 </style>
 
-<div id="pants">pants</div>
+<div id="test">test</div>
 
 <body>
 <script>
-pants.animate([
+test.textContent = 'This should animate line-height from 1 to 2.5 for 1s then snap to 5 for 1s then return to normal.';
+test.animate([
   {'line-height': '1'},
   {'line-height': '1'},
 ], 2000);
-pants.animate([
-  {'line-height': '50px'},
+test.animate([
+  {'line-height': '5px'},
 ], 2000);
-pants.animate([
+test.animate([
   {'line-height': '5', composite: 'add'},
 ], 2000);
-
-// testResponsiveInterpolation({
-//   property: 'left',
-//   start: null,
-//   end: {value: '100px', composite: 'replace'},
-//   underlying: 'auto',
-//   change: {
-//     underlying: '100px'
-//   },
-//   expectBefore: [
-//     {at: 0, is: 'auto'},
-//     {at: 0.25, is: 'auto'},
-//     {at: 0.5, is: '100px'},
-//     {at: 0.75, is: '100px'},
-//     {at: 1, is: '100px'},
-//   ],
-//   expectAfter: [
-//     {at: 0, is: '100px'},
-//     {at: 0.25, is: '125px'},
-//     {at: 0.5, is: '150px'},
-//     {at: 0.75, is: '175px'},
-//     {at: 1, is: '200px'},
-//   ],
-// });
 </script>
 </body>

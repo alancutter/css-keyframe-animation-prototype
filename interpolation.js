@@ -20,7 +20,7 @@ function Interpolation(immutableData) {
 }
 
 Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
-  console.log('cached pair', animationType.name);
+  console.log('cached pair', animationType.constructor.name);
   this.cache = {
     start: {
       isInvalid: resultPair.start.isInvalid,

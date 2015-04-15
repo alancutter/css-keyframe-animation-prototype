@@ -8,7 +8,7 @@ function getApplicableAnimationTypes(property) {
     propertyAnimationTypes[property] = (function() {
       switch (property) {
       case 'line-height':
-        return [LengthAnimationType(property), NumberAnimationType(property)];
+        return [new LengthAnimationType(property), new NumberAnimationType(property)];
       case 'bottom':
       case 'left':
       case 'right':
@@ -17,12 +17,12 @@ function getApplicableAnimationTypes(property) {
       case 'margin-left':
       case 'margin-right':
       case 'margin-top':
-        return [LengthAnimationType(property)];
+        return [new LengthAnimationType(property)];
       default:
         return [];
       }
     })();
-    propertyAnimationTypes[property].push(DefaultAnimationType(property));
+    propertyAnimationTypes[property].push(new DefaultAnimationType(property));
   }
   return propertyAnimationTypes[property];
 }
