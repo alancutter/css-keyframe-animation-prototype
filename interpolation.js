@@ -79,7 +79,7 @@ Interpolation.prototype.isInterpolated = function() {
   return isInterpolated;
 };
 
-Interpolation.prototype.environmentChanged = function(environment, underlyingValue) {
+Interpolation.prototype.validateCache = function(environment, underlyingValue) {
   if (this.cache != null) {
     if (!this.cache.start.isInvalid || !this.cache.start.isInvalid(environment, underlyingValue)) {
       if (!this.cache.end.isInvalid || !this.cache.end.isInvalid(environment, underlyingValue)) {
@@ -138,7 +138,7 @@ function applyInterpolations(environment, interpolations) {
   var startingIndex = 0;
   var first = interpolations[startingIndex];
   if (first.state.underlyingFraction == 0) {
-    first.environmentChanged(environment, null);
+    first.validateCache(environment, null);
     if (interpolations.length == 1) {
       var firstValue = first.state.animationValue;
       if (firstValue) {
@@ -154,7 +154,7 @@ function applyInterpolations(environment, interpolations) {
     if (!underlyingValue) {
       underlyingValue = current.getUnderlyingValue(environment);
     }
-    current.environmentChanged(environment, underlyingValue);
+    current.validateCache(environment, underlyingValue);
     var currentValue = current.state.animationValue;
     if (!currentValue) {
       continue;
