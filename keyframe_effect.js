@@ -29,13 +29,15 @@ function KeyframeEffect(effectInput) {
       });
     }
   });
-  this.interpolationRecords = [];
+  this.propertyInterpolationRecords = {};
   for (var property in propertyKeyframes) {
+    var interpolationRecords = [];
+    this.propertyInterpolationRecords[property] = interpolationRecords;
     var keyframes = propertyKeyframes[property];
     var applicableAnimationTypes = getApplicableAnimationTypes(property);
     // Create Interpolations.
     for (var i = 0; i < keyframes.length - 1; i++) {
-      this.interpolationRecords.push({
+      interpolationRecords.push({
         startOffset: keyframes[i].offset,
         endOffset: keyframes[i + 1].offset,
         duration: keyframes[i + 1].offset - keyframes[i].offset,
@@ -54,7 +56,7 @@ function KeyframeEffect(effectInput) {
     }
     // Adding neutral keyframes.
     if (keyframes.length == 1) {
-      this.interpolationRecords.push({
+      interpolationRecords.push({
         startOffset: 0,
         endOffset: 1,
         duration: 1,
@@ -69,7 +71,7 @@ function KeyframeEffect(effectInput) {
       });
     } else {
       if (keyframes[0].offset !== 0) {
-        this.interpolationRecords.push({
+        interpolationRecords.push({
           startOffset: 0,
           endOffset: keyframes[0].offset,
           duration: keyframes[0].offset,
@@ -84,7 +86,7 @@ function KeyframeEffect(effectInput) {
         });
       }
       if (lastElement(keyframes).offset != 1) {
-        this.interpolationRecords.push({
+        interpolationRecords.push({
           startOffset: lastElement(keyframes).offset,
           endOffset: 1,
           duration: 1 - lastElement(keyframes).offset,
@@ -102,17 +104,29 @@ function KeyframeEffect(effectInput) {
   }
 }
 
-KeyframeEffect.prototype.getInterpolationsAt = function(fraction) {
-  var interpolations = [];
-  for (var interpolationRecord of this.interpolationRecords) {
-    if (interpolationRecord.startOffset > fraction || interpolationRecord.endOffset <= fraction) {
-      continue;
+KeyframeEffect.prototype.getPropertyInterpolationsAt = function(fraction) {
+  var propertyInterpolations = {};
+  for (var property in this.propertyInterpolationRecords) {
+    propertyInterpolations[property] = [];
+    var interpolationRecords = this.propertyInterpolationRecords[property];
+    if (fraction <= 0) {
+      interpolationRecords[0].interpolation.interpolate(0);
+      propertyInterpolations[property].push(interpolationRecords[0].interpolation);
+    } else if (fraction >= 1) {
+      lastElement(interpolationRecords).interpolation.interpolate(1);
+      propertyInterpolations[property].push(lastElement(interpolationRecords).interpolation);
+    } else {
+      for (var interpolationRecord of interpolationRecords) {
+        if (interpolationRecord.startOffset > fraction || interpolationRecord.endOffset <= fraction) {
+          continue;
+        }
+        var subFraction = (fraction - interpolationRecord.startOffset) / interpolationRecord.duration;
+        interpolationRecord.interpolation.interpolate(subFraction);
+        propertyInterpolations[property].push(interpolationRecord.interpolation);
+      }
     }
-    var subFraction = (fraction - interpolationRecord.startOffset) / interpolationRecord.duration;
-    interpolationRecord.interpolation.interpolate(subFraction);
-    interpolations.push(interpolationRecord.interpolation);
   }
-  return interpolations;
+  return propertyInterpolations;
 }
 
 window.KeyframeEffect = KeyframeEffect;

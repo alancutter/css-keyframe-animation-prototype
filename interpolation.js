@@ -81,12 +81,16 @@ Interpolation.prototype.isInterpolated = function() {
 
 Interpolation.prototype.validateCache = function(environment, underlyingValue) {
   if (this.cache != null) {
+    if (this.state.fraction == 0 || this.state.fraction == 1) {
+      return;
+    }
     if (!this.cache.start.isInvalid || !this.cache.start.isInvalid(environment, underlyingValue)) {
       if (!this.cache.end.isInvalid || !this.cache.end.isInvalid(environment, underlyingValue)) {
         return;
       }
     }
   }
+  console.log('cache invalidated');
   this.cache = null;
   var hasNeutral = isNeutralKeyframe(this.immutable.start) || isNeutralKeyframe(this.immutable.end);
   for (var animationType of this.immutable.animationTypes) {

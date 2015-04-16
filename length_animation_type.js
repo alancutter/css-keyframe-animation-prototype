@@ -67,10 +67,10 @@ defineMethods(LengthAnimationType, {
   interpolate: lerp,
   add: add,
   maybeConvertEnvironment: function(environment) {
-    return this._maybeConvertValue(environment.get(property));
+    return this._maybeConvertValue(environment.get(this.property));
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
-    environment.set(property, interpolableValue + 'px');
+    environment.set(this.property, interpolableValue + 'px');
   },
 });
 

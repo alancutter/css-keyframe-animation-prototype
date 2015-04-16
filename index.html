@@ -10,42 +10,47 @@
 <script src="number_animation_type.js"></script>
 
 <style>
-.target {
-  width: 10px;
-  height: 10px;
-  background: green;
-  left: auto;
-}
-.change {
-  left: 0px;
-}
-
 #test {
   width: 400px;
-  position: absolute;
   border: solid;
-  left: auto;
-  line-height: 1;
+}
+
+#ball {
+  background: blue;
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  margin-left: -25px;
+  margin-top: -25px;
+  border-radius: 50%;
 }
 </style>
 
-<div id="test">test</div>
+<div id="test">Click me</div>
+<div id="ball"></div>
 
 <body>
 <script>
-test.textContent = 'This should animate line-height from 1 to 2.5 for 1s then snap to 5 for 1s then return to normal.';
-test.animate([
-  {'line-height': '1'},
-  {'line-height': '1'},
-], 2000);
-test.animate([
-  {'line-height': '5px'},
-], 2000);
-test.animate([
-  {'line-height': 'unknown'},
-], 2000);
-test.animate([
-  {'line-height': '5', composite: 'add'},
-], 2000);
+test.addEventListener('click', function() {
+  test.textContent = 'This should animate line-height from 0 to 2.5 for 1s then snap to 5.';
+  test.animate([
+    {'line-height': '0'},
+    {'line-height': '0'},
+  ], 2000);
+  test.animate([
+    {'line-height': '5px'},
+  ], 2000);
+  test.animate([
+    {'line-height': '5', composite: 'add'},
+  ], 2000);
+});
+
+ball.animate([
+  {left: '0px', top: '0px'},
+  {left: '0px', top: '0px'},
+], 1000);
+document.body.addEventListener('click', function(event) {
+  ball.animate([{left: event.clientX + 'px', top: event.clientY + 'px'}], 1000);
+});
 </script>
 </body>
