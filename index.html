@@ -15,7 +15,7 @@
   border: solid;
 }
 
-#ball {
+.ball {
   background: blue;
   position: absolute;
   width: 50px;
@@ -27,7 +27,7 @@
 </style>
 
 <div id="test">Click me</div>
-<div id="ball"></div>
+<div id="ballpit"></div>
 
 <body>
 <script>
@@ -45,12 +45,31 @@ test.addEventListener('click', function() {
   ], 2000);
 });
 
-ball.animate([
-  {left: '0px', top: '0px'},
-  {left: '0px', top: '0px'},
-], 1000);
-document.body.addEventListener('click', function(event) {
-  ball.animate([{left: event.clientX + 'px', top: event.clientY + 'px'}], 1000);
+function forRange(n, f) {
+  for (var i = 0; i < n; i++) {
+    f(i);
+  }
+}
+
+forRange(10, function(i) {
+  var duration = i * 200;
+  var ball = document.createElement('div');
+  ball.classList.add('ball')
+  ballpit.appendChild(ball);
+  ball.animate([
+    {left: '0px', top: '0px'},
+    {left: '0px', top: '0px'},
+  ], 1000);
+  document.body.addEventListener('mousemove', function(event) {
+    ball.animate([{left: event.clientX + 'px', top: event.clientY + 'px'}], duration).onfinish = function(animation) {
+      for (var i = ball.animations.length - 1; i >= 0; i--) {
+        if (ball.animations[i] == animation) {
+          ball.animations = ball.animations.slice(i);
+          break;
+        }
+      }
+    };
+  });
 });
 </script>
 </body>

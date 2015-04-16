@@ -1,7 +1,7 @@
 (function() {
 'use strict';
 
-var activeElements = [];
+var activeElements = new Set();
 var now = performance.now();
 
 function Animation(startTime, effect, duration) {
@@ -10,12 +10,17 @@ function Animation(startTime, effect, duration) {
   this.duration = duration;
   this.fill = 'forwards';
   this.timingFunction = function(t) {return (t == 0 || t == 1) ? t : (1 - Math.cos(t * Math.PI)) / 2;};
+  this.onfinish = function() {};
+  this.finished = false;
 }
 Animation.prototype.getPropertyInterpolationsAt = function(time) {
   var fraction = (time - this.startTime) / this.duration;
   if (fraction < 0) {
     return [];
   } else if (fraction >= 1) {
+    if (!this.finished) {
+      this.onfinish(this);
+    }
     return this.effect.getPropertyInterpolationsAt(1);
   }
   return this.effect.getPropertyInterpolationsAt(this.timingFunction(fraction));
@@ -25,8 +30,10 @@ Element.prototype.animate = function(effectInput, duration) {
   if (!this.animations) {
     this.animations = [];
   }
-  this.animations.push(new Animation(now, new KeyframeEffect(effectInput), duration));
-  activeElements.push(this);
+  var animation = new Animation(now, new KeyframeEffect(effectInput), duration);
+  this.animations.push(animation);
+  activeElements.add(this);
+  return animation;
 };
 
 function interpolate(time) {
