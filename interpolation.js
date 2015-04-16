@@ -14,7 +14,6 @@ function Interpolation(immutableData) {
   this.state = {
     fraction: 0,
     underlyingFraction: underlyingFractionForkeyframe(this.immutable.start),
-    isNeutral: isNeutralKeyframe(this.immutable.start),
     animationValue: null,
   };
 }
@@ -47,7 +46,6 @@ Interpolation.prototype.interpolate = function(fraction) {
       underlyingFractionForkeyframe(this.immutable.start),
       underlyingFractionForkeyframe(this.immutable.end),
       fraction);
-  this.state.isNeutral = isNeutralKeyframe(fraction < 0.5 ? this.immutable.start : this.immutable.end);
   if (!this.cache) {
     this.state.animationValue = null;
     return;
@@ -173,7 +171,7 @@ function applyInterpolations(environment, interpolations) {
         interpolableValue: result.interpolableValue,
         nonInterpolableValue: result.nonInterpolableValue,
       };
-    } else if (!current.state.isNeutral) {
+    } else {
       underlyingValue = currentValue;
     }
   }
