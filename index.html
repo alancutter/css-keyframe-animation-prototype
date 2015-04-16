@@ -16,11 +16,17 @@
 }
 
 .ball {
-  background: blue;
   position: absolute;
   width: 10px;
   height: 10px;
   border-radius: 50%;
+}
+
+#ballpit > .ball:nth-child(2n) {
+    background: black;
+}
+#ballpit > .ball:nth-child(2n+1) {
+    background: orange;
 }
 </style>
 
