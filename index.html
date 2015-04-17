@@ -17,8 +17,8 @@
 
 .ball {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
 }
 
@@ -56,7 +56,7 @@ function forRange(n, f) {
 }
 
 forRange(10, function(i) {
-  var duration = i * 200;
+  var duration = (i + 1) * 500;
   var ball = document.createElement('div');
   ball.classList.add('ball')
   ballpit.appendChild(ball);
