@@ -127,13 +127,13 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
         };
       } else {
         this.cache[side] = {
-          isInvalid: function() {return true;},
+          isInvalid: isNeutralKeyframe(keyframe) ? function() {return true;} : null,
           animationValue: null,
         };
       }
     }
   }
-  console.assert(this.cache);
+  console.assert(this.cache && this.cache.start && this.cache.end);
   this.interpolate(this.state.fraction);
 };
 
