@@ -15,7 +15,7 @@ Animation.prototype.getPropertyInterpolationsAt = function(time) {
   var fraction = (time - this.timing.startTime) / this.timing.duration;
   if (fraction >= 1 && !this.finished) {
     this.finished = true;
-    setTimeout(this.onfinish.bind(this), 0);
+    setTimeout(this.onfinish.bind(this, this), 0);
   }
   var activeBefore = this.timing.fill == 'backwards' || this.timing.fill == 'both';
   var activeAfter = this.timing.fill == 'forwards' || this.timing.fill == 'both';
