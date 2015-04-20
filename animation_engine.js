@@ -11,7 +11,7 @@ function Animation(effect, timing) {
   this.finished = false;
   this.onfinish = function() {};
 }
-Animation.prototype.getPropertyInterpolationsAt = function(time) {
+Animation.prototype.addPropertyInterpolationsAt = function(time, result) {
   var fraction = (time - this.timing.startTime) / this.timing.duration;
   if (fraction >= 1 && !this.finished) {
     this.finished = true;
@@ -20,10 +20,10 @@ Animation.prototype.getPropertyInterpolationsAt = function(time) {
   var activeBefore = this.timing.fill == 'backwards' || this.timing.fill == 'both';
   var activeAfter = this.timing.fill == 'forwards' || this.timing.fill == 'both';
   if ((fraction < 0 && !activeBefore) || (fraction >= 1 && !activeAfter)) {
-    return [];
+    return;
   }
   fraction = Math.min(Math.max(fraction, 0), 1);
-  return this.effect.getPropertyInterpolationsAt(this.timing.easing(fraction));
+  this.effect.addPropertyInterpolationsAt(this.timing.easing(fraction), result);
 };
 
 Element.prototype.animate = function(effectInput, timingInput) {
@@ -52,14 +52,7 @@ function interpolate(time) {
   for (var element of activeElements) {
     element.propertyInterpolations = {};
     for (var animation of element.animations) {
-      var propertyInterpolations = animation.getPropertyInterpolationsAt(time);
-      for (var property in propertyInterpolations) {
-        var interpolations = propertyInterpolations[property];
-        if (!(property in element.propertyInterpolations)) {
-          element.propertyInterpolations[property] = [];
-        }
-        [].push.apply(element.propertyInterpolations[property], interpolations);
-      }
+      var propertyInterpolations = animation.addPropertyInterpolationsAt(time, element.propertyInterpolations);
     }
   }
 };
@@ -68,10 +61,7 @@ function apply() {
   for (var element of activeElements) {
     var environment = new StyleEnvironment(element);
     for (var property in element.propertyInterpolations) {
-      var interpolations = element.propertyInterpolations[property];
-      var startingIndex = interpolations.length - 1;
-      for (; startingIndex > 0 && interpolations[startingIndex].state.underlyingFraction != 0; startingIndex--);
-      applyInterpolations(environment, interpolations.slice(startingIndex));
+      applyInterpolations(environment, element.propertyInterpolations[property]);
     }
   }
 }

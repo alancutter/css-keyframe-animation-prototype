@@ -19,7 +19,7 @@ function Interpolation(immutableData) {
 }
 
 Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
-  console.log('cached pair', animationType.constructor.name);
+  // console.log('cached pair', animationType.constructor.name);
   this.cache = {
     start: {
       isInvalid: resultPair.start.isInvalid,
@@ -90,7 +90,7 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
       }
     }
   }
-  console.log('cache invalidated');
+  // console.log('cache invalidated');
   this.cache = null;
   var hasNeutral = isNeutralKeyframe(this.immutable.start) || isNeutralKeyframe(this.immutable.end);
   for (var animationType of this.immutable.animationTypes) {
@@ -138,8 +138,9 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
 };
 
 function applyInterpolations(environment, interpolations) {
+  var startingIndex = interpolations.length - 1;
+  for (; startingIndex > 0 && interpolations[startingIndex].state.underlyingFraction != 0; startingIndex--);
   var underlyingValue = null;
-  var startingIndex = 0;
   var first = interpolations[startingIndex];
   if (first.state.underlyingFraction == 0) {
     first.validateCache(environment, null);

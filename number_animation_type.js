@@ -1,8 +1,9 @@
 (function() {
 'use strict';
 
-function NumberAnimationType(property) {
+function NumberAnimationType(property, clamping) {
   this.property = property;
+  this.clamping = clamping;
 }
 
 defineMethods(NumberAnimationType, {
@@ -55,8 +56,11 @@ defineMethods(NumberAnimationType, {
     return this._maybeConvertValue(environment.get(this.property));
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
-    environment.set(this.property, interpolableValue);
+    environment.set(this.property, this.clamp(interpolableValue));
   },
+  clamp: function(value) {
+    return (this.clamping == 'non-negative' && value < 0) ? 0 : value;
+  }
 });
 
 

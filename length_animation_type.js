@@ -1,8 +1,9 @@
 (function() {
 'use strict';
 
-function LengthAnimationType(property) {
+function LengthAnimationType(property, clamping) {
   this.property = property;
+  this.clamping = clamping;
 }
 
 defineMethods(LengthAnimationType, {
@@ -70,8 +71,11 @@ defineMethods(LengthAnimationType, {
     return this._maybeConvertValue(environment.get(this.property));
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
-    environment.set(this.property, interpolableValue + 'px');
+    environment.set(this.property, this.clamp(interpolableValue) + 'px');
   },
+  clamp: function(value) {
+    return (this.clamping == 'non-negative' && value < 0) ? 0 : value;
+  }
 });
 
 
