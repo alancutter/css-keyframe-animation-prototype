@@ -3,38 +3,48 @@
 
 var activeElements = new Set();
 var now = performance.now();
+var defaultEasing = function(t) {return (t == 0 || t == 1) ? t : (1 - Math.cos(t * Math.PI)) / 2;};
 
-function Animation(startTime, effect, duration) {
-  this.startTime = startTime;
+function Animation(effect, timing) {
   this.effect = effect;
-  this.duration = duration;
-  this.fill = 'forwards';
-  this.timingFunction = function(t) {return (t == 0 || t == 1) ? t : (1 - Math.cos(t * Math.PI)) / 2;};
-  this.onfinish = function() {};
+  this.timing = timing;
   this.finished = false;
+  this.onfinish = function() {};
 }
 Animation.prototype.getPropertyInterpolationsAt = function(time) {
-  var fraction = (time - this.startTime) / this.duration;
+  var fraction = (time - this.timing.startTime) / this.timing.duration;
   if (fraction < 0) {
     return [];
   } else if (fraction >= 1) {
     if (!this.finished) {
       this.onfinish(this);
+      this.finished = true;
     }
     return this.effect.getPropertyInterpolationsAt(1);
   }
-  return this.effect.getPropertyInterpolationsAt(this.timingFunction(fraction));
+  return this.effect.getPropertyInterpolationsAt(this.timing.easing(fraction));
 };
 
-Element.prototype.animate = function(effectInput, duration) {
+Element.prototype.animate = function(effectInput, timingInput) {
   if (!this.animations) {
     this.animations = [];
   }
-  var animation = new Animation(now, new KeyframeEffect(effectInput), duration);
+  var animation = new Animation(new KeyframeEffect(effectInput), parseTiming(timingInput));
   this.animations.push(animation);
   activeElements.add(this);
   return animation;
 };
+
+function parseTiming(timingInput) {
+  if (typeof timingInput == 'number') {
+    timingInput = {duration: timingInput};
+  }
+  var timing = {};
+  timing.duration = timingInput.duration || 0;
+  timing.startTime = timingInput.startTime || now;
+  timing.easing = timingInput.easing || defaultEasing;
+  return timing;
+}
 
 function interpolate(time) {
   for (var element of activeElements) {
