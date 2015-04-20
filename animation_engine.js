@@ -13,15 +13,16 @@ function Animation(effect, timing) {
 }
 Animation.prototype.getPropertyInterpolationsAt = function(time) {
   var fraction = (time - this.timing.startTime) / this.timing.duration;
-  if (fraction < 0) {
-    return [];
-  } else if (fraction >= 1) {
-    if (!this.finished) {
-      this.onfinish(this);
-      this.finished = true;
-    }
-    return this.effect.getPropertyInterpolationsAt(1);
+  if (fraction >= 1 && !this.finished) {
+    this.finished = true;
+    setTimeout(this.onfinish.bind(this), 0);
   }
+  var activeBefore = this.timing.fill == 'backwards' || this.timing.fill == 'both';
+  var activeAfter = this.timing.fill == 'forwards' || this.timing.fill == 'both';
+  if ((fraction < 0 && !activeBefore) || (fraction >= 1 && !activeAfter)) {
+    return [];
+  }
+  fraction = Math.min(Math.max(fraction, 0), 1);
   return this.effect.getPropertyInterpolationsAt(this.timing.easing(fraction));
 };
 
@@ -43,6 +44,7 @@ function parseTiming(timingInput) {
   timing.duration = timingInput.duration || 0;
   timing.startTime = timingInput.startTime || now;
   timing.easing = timingInput.easing || defaultEasing;
+  timing.fill = timingInput.fill || 'none';
   return timing;
 }
 

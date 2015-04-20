@@ -64,7 +64,10 @@ forRange(10, function(i) {
     {left: '0px', top: '0px'},
   ], 1000);
   document.body.addEventListener('mousemove', function(event) {
-    ball.animate([{left: event.clientX + 'px', top: event.clientY + 'px'}], duration).onfinish = function(animation) {
+    ball.animate([{left: event.clientX + 'px', top: event.clientY + 'px'}], {
+      duration: duration,
+      fill: 'forwards',
+    }).onfinish = function(animation) {
       for (var i = ball.animations.length - 1; i >= 0; i--) {
         if (ball.animations[i] == animation) {
           ball.animations = ball.animations.slice(i);
