@@ -1,21 +1,31 @@
 (function(){
 'use strict';
 
+var tests = [];
+
 function testAnimations(inputs) {
-  assertAttributes('property animations expect', inputs);
-  var keyframesList = getKeyframesList(inputs.property, inputs.animations);
-  var container = createElement('div', null, document.body);
-  for (var expectation of inputs.expect) {
-    assertAttributes('at is', expectation);
-    var target = createElement('div', 'target', container);
-    applyKeyframesList(target, keyframesList, expectation.at);
-    var actual = getComputedStyle(target)[inputs.property];
-    var pass = actual == expectation.is;
-    var testText = inputs.property + ' at ' + expectation.at + ' expected ' + expectation.is + ' was ' + actual;
-    if (pass) {
-      console.log('PASS:', testText);
-    } else {
-      console.assert(false, testText);
+  tests.push(inputs);
+}
+
+function runTests() {
+  var output = createElement('pre', 'output', document.body);
+  for (var inputs of tests) {
+    assertAttributes('property animations expect', inputs);
+    var keyframesList = getKeyframesList(inputs.property, inputs.animations);
+    var container = createElement('div', 'container', document.body);
+    for (var expectation of inputs.expect) {
+      assertAttributes('at is', expectation);
+      var target = createTarget(container);
+      applyKeyframesList(target, keyframesList, expectation.at);
+      var actual = getComputedStyle(target)[inputs.property];
+      var pass = actual == expectation.is;
+      var testText = (pass ? 'PASS' : 'FAIL') + ': ' + inputs.property + ' at ' + expectation.at + ' expected ' + expectation.is + ' was ' + actual + '\n';
+      if (pass) {
+        console.log('PASS:', testText);
+      } else {
+        console.assert(false, testText);
+      }
+      output.textContent += testText;
     }
   }
 }
@@ -54,6 +64,16 @@ function createElement(tagName, className, parent) {
   return element;
 }
 
+function createTarget(container) {
+  var template = document.querySelector("#target-template");
+  if (!template) {
+    return createElement('div', 'target', container);
+  }
+  var outer = template.content.firstElementChild.cloneNode(true);
+  container.appendChild(outer);
+  return outer.querySelector('.target') || outer;
+}
+
 function applyKeyframesList(target, keyframesList, at) {
   var propertyInterpolations = {};
   for (var keyframes of keyframesList) {
@@ -64,6 +84,9 @@ function applyKeyframesList(target, keyframesList, at) {
     applyInterpolations(environment, propertyInterpolations[property]);
   }
 }
+
+requestAnimationFrame(runTests);
+
 window.testAnimations = testAnimations;
 
 })();

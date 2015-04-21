@@ -10,33 +10,57 @@
 <script src="repeat_list_animation_type.js"></script>
 
 <style>
+.parent {
+  background-image: url(#), url(#), url(#);
+  background-position-x: 100px, 200px, 300px;
+}
 .target {
   font-size: 10px;
   background-image: url(#), url(#);
 }
 </style>
-<body>
+
+<template id="target-template">
+  <div class="parent">
+    <div class="target"></div>
+  </div>
+</template>
 
 <script>
-// testAnimations({
-//   property: 'line-height',
-//   animations: [
-//     [{value: '0'}, {value: '0'}],
-//     [null, {value: '5px', composite: 'add'}],
-//     [null, {value: '5', composite: 'add'}],
-//   ],
-//   expect: [
-//     // getComputedStyle resolves numbers as pixels.
-//     // line-height must be non-negative.
-//     {at: -1, is: '0px'},
-//     {at: 0, is: '0px'},
-//     {at: 0.25, is: '12.5px'},
-//     {at: 0.5, is: '50px'},
-//     {at: 0.75, is: '50px'},
-//     {at: 1, is: '50px'},
-//     {at: 2, is: '50px'},
-//   ],
-// });
+testAnimations({
+  property: 'line-height',
+  animations: [
+    [{value: '0'}, {value: '0'}],
+    [null, {value: '5px', composite: 'add'}],
+    [null, {value: '5', composite: 'add'}],
+  ],
+  expect: [
+    // getComputedStyle resolves numbers as pixels.
+    // line-height must be non-negative.
+    {at: -1, is: '0px'},
+    {at: 0, is: '0px'},
+    {at: 0.25, is: '12.5px'},
+    {at: 0.5, is: '50px'},
+    {at: 0.75, is: '50px'},
+    {at: 1, is: '50px'},
+    {at: 2, is: '50px'},
+  ],
+});
+
+var validBackgroundPositionXValues = [
+  {value: 'inherit', composite: 'accumulate'},
+  {value: 'initial', composite: 'replace'},
+  {value: '0px', composite: 'accumulate'},
+  {value: '0px, 100px', composite: 'add'},
+  {value: 'inherit', composite: 'replace'},
+  {value: 'initial', composite: 'add'},
+  {value: '0px', composite: 'add'},
+  {value: 'inherit', composite: 'add'},
+  {value: '0px, 100px', composite: 'replace'},
+  {value: 'initial', composite: 'accumulate'},
+  {value: '0px, 100px', composite: 'accumulate'},
+  {value: '0px', composite: 'replace'},
+];
 
 testAnimations({
   property: 'background-position-x',
@@ -55,4 +79,3 @@ testAnimations({
   ],
 });
 </script>
-</body>

@@ -93,7 +93,6 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
       }
     }
   }
-  console.log('cache invalidated');
   this.cache = null;
   var hasNeutral = isNeutralKeyframe(this.immutable.start) || isNeutralKeyframe(this.immutable.end);
   for (var animationType of this.immutable.animationTypes) {
