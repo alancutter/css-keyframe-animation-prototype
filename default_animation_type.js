@@ -22,13 +22,16 @@ defineMethods(DefaultAnimationType, {
     }
     return null;
   },
+  equalNonInterpolableValues: function(a, b) {
+    return true;
+  },
   interpolate: lerp,
   maybeConvertEnvironment: function(environment) {
     return null;
   },
   add: null,
   apply: function(interpolableValue, nonInterpolableValue, environment) {
-    environment.set(property, nonInterpolableValue);
+    environment.set(this.property, nonInterpolableValue);
   },
 });
 

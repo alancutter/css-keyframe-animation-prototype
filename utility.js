@@ -16,6 +16,10 @@ function defineMethods(func, methods) {
   Object.defineProperties(func.prototype, properties);
 }
 
+function identity(x) {
+  return x;
+}
+
 function isNeutralKeyframe(keyframe) {
   return keyframe == null;
 }
@@ -33,8 +37,8 @@ function lerp(a, b, fraction) {
     return b;
   }
   if (a instanceof Array) {
-    return a.map(function(x, i) {
-      return lerp(x, b[i]);
+    return a.map(function(aItem, i) {
+      return lerp(aItem, b[i], fraction);
     });
   }
   return a * (1 - fraction) + b * fraction;
@@ -46,6 +50,7 @@ function underlyingFractionForkeyframe(keyframe) {
 
 window.add = add;
 window.defineMethods = defineMethods;
+window.identity = identity;
 window.isNeutralKeyframe = isNeutralKeyframe;
 window.lastElement = lastElement;
 window.lerp = lerp;

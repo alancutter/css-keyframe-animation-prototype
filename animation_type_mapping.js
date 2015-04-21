@@ -18,6 +18,9 @@ function getApplicableAnimationTypes(property) {
       case 'margin-right':
       case 'margin-top':
         return [new LengthAnimationType(property)];
+      case 'background-position-x':
+      case 'background-position-y':
+        return [new RepeatListAnimationType(property, new LengthAnimationType())];
       default:
         return [];
       }

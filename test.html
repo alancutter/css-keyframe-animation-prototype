@@ -7,33 +7,51 @@
 <script src="default_animation_type.js"></script>
 <script src="length_animation_type.js"></script>
 <script src="number_animation_type.js"></script>
+<script src="repeat_list_animation_type.js"></script>
 
 <style>
 .target {
   font-size: 10px;
+  background-image: url(#), url(#);
 }
 </style>
 <body>
-<template id="target-template"></template>
 
 <script>
+// testAnimations({
+//   property: 'line-height',
+//   animations: [
+//     [{value: '0'}, {value: '0'}],
+//     [null, {value: '5px', composite: 'add'}],
+//     [null, {value: '5', composite: 'add'}],
+//   ],
+//   expect: [
+//     // getComputedStyle resolves numbers as pixels.
+//     // line-height must be non-negative.
+//     {at: -1, is: '0px'},
+//     {at: 0, is: '0px'},
+//     {at: 0.25, is: '12.5px'},
+//     {at: 0.5, is: '50px'},
+//     {at: 0.75, is: '50px'},
+//     {at: 1, is: '50px'},
+//     {at: 2, is: '50px'},
+//   ],
+// });
+
 testAnimations({
-  property: 'line-height',
-  animations: [
-    [{value: '0'}, {value: '0'}],
-    [null, {value: '5px', composite: 'add'}],
-    [null, {value: '5', composite: 'add'}],
-  ],
+  property: 'background-position-x',
+  animations: [[
+    {value: '0px, 100px'},
+    {value: '10px, 200px'},
+  ]],
   expect: [
-    // getComputedStyle resolves numbers as pixels.
-    // line-height must be non-negative.
-    {at: -1, is: '0px'},
-    {at: 0, is: '0px'},
-    {at: 0.25, is: '12.5px'},
-    {at: 0.5, is: '50px'},
-    {at: 0.75, is: '50px'},
-    {at: 1, is: '50px'},
-    {at: 2, is: '50px'},
+    {at: -1, is: '-10px, 0px'},
+    {at: 0, is: '0px, 100px'},
+    {at: 0.25, is: '2.5px, 125px'},
+    {at: 0.5, is: '5px, 150px'},
+    {at: 0.75, is: '7.5px, 175px'},
+    {at: 1, is: '10px, 200px'},
+    {at: 2, is: '20px, 300px'},
   ],
 });
 </script>

@@ -50,13 +50,19 @@ defineMethods(NumberAnimationType, {
   maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
     return this._maybeConvertSingle(keyframe);
   },
+  equalNonInterpolableValues: function(a, b) {
+    return true;
+  },
   interpolate: lerp,
   add: add,
   maybeConvertEnvironment: function(environment) {
     return this._maybeConvertValue(environment.get(this.property));
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
-    environment.set(this.property, this.clamp(interpolableValue));
+    environment.set(this.property, this.cssValue(interpolableValue, nonInterpolableValue));
+  },
+  cssValue: function(interpolableValue, nonInterpolableValue) {
+    return this.clamp(interpolableValue);
   },
   clamp: function(value) {
     return (this.clamping == 'non-negative' && value < 0) ? 0 : value;

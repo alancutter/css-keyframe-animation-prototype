@@ -1,26 +1,6 @@
 (function(){
 'use strict';
 
-// testInterpolations({
-//   property: 'line-height',
-//   interpolations: [
-//     [{value: '0'}, {value: '0'}],
-//     [null, {value: '5px', composite: 'add'}],
-//     [null, {value: '5', composite: 'add'}],
-//   ],
-//   expect: [
-//     // getComputedStyle resolves numbers as pixels.
-//     {at: -1, is: '-50px'},
-//     {at: 0, is: '0px'},
-//     {at: 0.25, is: '25px'},
-//     {at: 0.5, is: '5px'},
-//     {at: 0.75, is: '5px'},
-//     {at: 1, is: '5px'},
-//     {at: 2, is: '5px'},
-//   ],
-// });
-
-
 function testAnimations(inputs) {
   assertAttributes('property animations expect', inputs);
   var keyframesList = getKeyframesList(inputs.property, inputs.animations);
@@ -36,7 +16,6 @@ function testAnimations(inputs) {
       console.log('PASS:', testText);
     } else {
       console.assert(false, testText);
-      applyKeyframesList(target, keyframesList, expectation.at);
     }
   }
 }

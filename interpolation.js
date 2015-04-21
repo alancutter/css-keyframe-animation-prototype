@@ -52,7 +52,10 @@ Interpolation.prototype.interpolate = function(fraction) {
   }
   var startValue = this.cache.start.animationValue;
   var endValue = this.cache.end.animationValue;
-  if (startValue && endValue && startValue.animationType === endValue.animationType && startValue.nonInterpolableValue == endValue.nonInterpolableValue) {
+  if (startValue
+      && endValue
+      && startValue.animationType === endValue.animationType
+      && startValue.animationType.equalNonInterpolableValues(startValue.nonInterpolableValue, endValue.nonInterpolableValue)) {
     this.state.animationValue = {
       animationType: startValue.animationType,
       interpolableValue: startValue.animationType.interpolate(startValue.interpolableValue, endValue.interpolableValue, fraction),
@@ -90,7 +93,7 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
       }
     }
   }
-  // console.log('cache invalidated');
+  console.log('cache invalidated');
   this.cache = null;
   var hasNeutral = isNeutralKeyframe(this.immutable.start) || isNeutralKeyframe(this.immutable.end);
   for (var animationType of this.immutable.animationTypes) {
