@@ -47,35 +47,35 @@ testAnimations({
   ],
 });
 
-var validBackgroundPositionXValues = [
-  {value: 'inherit', composite: 'accumulate'},
-  {value: 'initial', composite: 'replace'},
-  {value: '0px', composite: 'accumulate'},
-  {value: '0px, 100px', composite: 'add'},
-  {value: 'inherit', composite: 'replace'},
-  {value: 'initial', composite: 'add'},
-  {value: '0px', composite: 'add'},
-  {value: 'inherit', composite: 'add'},
-  {value: '0px, 100px', composite: 'replace'},
-  {value: 'initial', composite: 'accumulate'},
-  {value: '0px, 100px', composite: 'accumulate'},
-  {value: '0px', composite: 'replace'},
-];
-
 testAnimations({
   property: 'background-position-x',
   animations: [[
-    {value: '0px, 100px'},
-    {value: '10px, 200px'},
+    {value: '0px'}, {value: '0px'},
+  ], [
+    {value: '0px, 100px', composite: 'add'},
+    {value: '100px, 0px', composite: 'add'},
   ]],
   expect: [
-    {at: -1, is: '-10px, 0px'},
+    {at: -1, is: '-100px, 200px'},
     {at: 0, is: '0px, 100px'},
-    {at: 0.25, is: '2.5px, 125px'},
-    {at: 0.5, is: '5px, 150px'},
-    {at: 0.75, is: '7.5px, 175px'},
-    {at: 1, is: '10px, 200px'},
-    {at: 2, is: '20px, 300px'},
+    {at: 0.25, is: '25px, 75px'},
+    {at: 0.5, is: '50px, 50px'},
+    {at: 0.75, is: '75px, 25px'},
+    {at: 1, is: '100px, 0px'},
+    {at: 2, is: '200px, -100px'},
   ],
 });
+
+var validBackgroundPositionXValues = [
+  null,
+  {value: 'inherit', composite: 'accumulate'},
+  {value: '0px', composite: 'accumulate'},
+  {value: 'inherit', composite: 'replace'},
+  {value: '0px, 100px', composite: 'add'},
+  {value: '0px', composite: 'add'},
+  {value: 'inherit', composite: 'add'},
+  {value: '0px, 100px', composite: 'replace'},
+  {value: '0px, 100px', composite: 'accumulate'},
+  {value: '0px', composite: 'replace'},
+];
 </script>

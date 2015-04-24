@@ -8,39 +8,55 @@ function RepeatListAnimationType(property, subType) {
 
 defineMethods(RepeatListAnimationType, {
   maybeConvertPair: function(startKeyframe, endKeyframe) {
-    if (!startKeyframe || !endKeyframe) {
+    for (var keyframe of [startKeyframe, endKeyframe]) {
+      if (!keyframe || keyframe.value == 'inherit') {
+        return null;
+      }
+    }
+    if (startKeyframe.composite != endKeyframe.composite) {
       return null;
     }
+
+    var startItems = startKeyframe.value.split(', ');
+    var endItems = endKeyframe.value.split(', ');
+    if (keyframe.composite != 'replace' && startItems.length != endItems.length) {
+      return null;
+    }
+
+    return this._convertItemListPair(startItems, endItems, startKeyframe.composite);
+  },
+  _convertItemListPair: function(startItems, endItems, composite) {
     var result = {};
     for (var side of ['start', 'end']) {
       result[side] = {
         isInvalid: [],
         interpolableValue: [],
-        nonInterpolableValue: [],
+        nonInterpolableValue: {
+          composite: composite,
+          subValues: [],
+        },
       };
     }
-    var startItems = startKeyframe.value.split(', ');
-    var endItems = endKeyframe.value.split(', ');
     for (var i = 0; i < startItems.length || i < endItems.length; i++) {
       var startItem = startItems[i % startItems.length];
       var endItem = endItems[i % endItems.length];
       var subResult = this.subType.maybeConvertPair(
-          {value: startItem, composite: startKeyframe.composite},
-          {value: endItem, composite: endKeyframe.composite});
+          {value: startItem, composite: composite},
+          {value: endItem, composite: composite});
       if (!subResult) {
         return null;
       }
       for (var side of ['start', 'end']) {
         result[side].isInvalid.push(subResult[side].isInvalid);
         result[side].interpolableValue.push(subResult[side].interpolableValue);
-        result[side].nonInterpolableValue.push(subResult[side].nonInterpolableValue);
+        result[side].nonInterpolableValue.subValues.push(subResult[side].nonInterpolableValue);
       }
     }
     ['start', 'end'].forEach(function(side) {
       var isInvalidList = result[side].isInvalid.filter(identity);
       result[side].isInvalid = (isInvalidList.length == 0) ? null : function(environment, underlyingValue) {
         return isInvalidList.some(function(isInvalid) {
-          return isInvalid(environment, underlyingValue);
+          return isInvalid(environment, null);
         });
       };
     });
@@ -53,16 +69,50 @@ defineMethods(RepeatListAnimationType, {
     return null;
   },
   equalNonInterpolableValues: function(a, b) {
-    if (a.length != b.length) {
+    if (a.subValues.length != b.subValues.length) {
       return false;
     }
     var subType = this.subType;
-    return a.every(function(aItem, i) {
-      return subType.equalNonInterpolableValues(aItem, b[i]);
+    return a.subValues.every(function(aItem, i) {
+      return subType.equalNonInterpolableValues(aItem, b.subValues[i]);
     });
   },
   interpolate: lerp,
-  add: add,
+  add: function(underlyingInterpolableValue, underlyingNonInterpolableValue, underlyingFraction, interpolableValue, nonInterpolableValue) {
+    if (nonInterpolableValue.composite == 'replace') {
+      return {
+        interpolableValue: interpolableValue,
+        nonInterpolableValue: nonInterpolableValue,
+      };
+    }
+    var result = {
+      interpolableValue: [],
+      nonInterpolableValue: {
+        composite: nonInterpolableValue.composite,
+        subValues: [],
+      },
+    }
+    var i = 0;
+    for (; i < underlyingInterpolableValue.length && i < interpolableValue.length; i++) {
+      var subResult = this.subType.add(
+          underlyingInterpolableValue[i],
+          underlyingNonInterpolableValue.subValues[i],
+          underlyingFraction,
+          interpolableValue[i],
+          nonInterpolableValue.subValues[i]);
+      result.interpolableValue.push(subResult.interpolableValue);
+      result.nonInterpolableValue.subValues.push(subResult.nonInterpolableValue);
+    }
+    for (; i < underlyingInterpolableValue.length; i++) {
+      result.interpolableValue.push(underlyingInterpolableValue[i]);
+      result.nonInterpolableValue.subValues.push(underlyingNonInterpolableValue.subValues[i]);
+    }
+    for (; i < interpolableValue.length; i++) {
+      result.interpolableValue.push(interpolableValue[i]);
+      result.nonInterpolableValue.subValues.push(nonInterpolableValue.subValues[i]);
+    }
+    return result;
+  },
   maybeConvertEnvironment: function(environment) {
     return null;
   },

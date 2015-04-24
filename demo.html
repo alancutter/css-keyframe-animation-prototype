@@ -7,6 +7,7 @@
 <script src="default_animation_type.js"></script>
 <script src="length_animation_type.js"></script>
 <script src="number_animation_type.js"></script>
+<script src="repeat_list_animation_type.js"></script>
 
 <style>
 #test {
@@ -27,10 +28,25 @@
 #ballpit > .ball:nth-child(2n+1) {
     background: orange;
 }
+
+#chromeTrail {
+  position: absolute;
+  width: 1000px;
+  height: 1000px;
+  border: solid;
+  background-repeat: no-repeat;
+  background-blend-mode: screen;
+  background-image:
+      url("http://fc06.deviantart.net/fs70/f/2012/190/b/1/mlp_logo_google_chrome_by_golden_fly-d56jr8g.png"),
+      url("http://files.softicons.com/download/application-icons/google-chrome-icon-by-gianluca75/png/256x256/grey_chrome.png"),
+      url("http://1.bp.blogspot.com/-KR9wpbm6l-o/T6pTiH-RBHI/AAAAAAAADgU/PSrDgkrXEUs/s1600/Chrome_logo.png"),
+      url("http://img2.wikia.nocookie.net/__cb20110320184411/logopedia/images/9/98/Google_Chrome_Logo_2008.svg");
+}
 </style>
 
 <div id="test">Click me</div>
 <div id="ballpit"></div>
+<div id="chromeTrail"></div>
 
 <body>
 <script>
@@ -77,5 +93,25 @@ forRange(10, function(i) {
     };
   });
 });
+
+chromeTrail.animate([
+  {'background-position-x': '350px, 350px, 350px, 350px', 'background-position-y': '350px, 350px, 350px, 350px'},
+  {'background-position-x': '350px, 350px, 350px, 350px', 'background-position-y': '350px, 350px, 350px, 350px'},
+], {duration: 1000, fill: 'forwards'});
+chromeTrail.addEventListener('click', function() {
+  for (var i = 0; i < 4; i++) {
+    var toX = ['0px', '0px', '0px', '0px'];
+    var toY = ['0px', '0px', '0px', '0px'];
+    for (var to of [toX, toY]) {
+      to[i] = (((Math.random() * 2 - 1) * 100) >> 0) + 'px';
+      console.log(to);
+    }
+    chromeTrail.animate([
+      {'background-position-x': '0px, 0px, 0px, 0px', 'background-position-y': '0px, 0px, 0px, 0px', composite: 'add'},
+      {'background-position-x': toX.join(', '), 'background-position-y': toY.join(', '), composite: 'add'},
+    ], {duration: 1000 / (i + 1), fill: 'forwards'});
+  }
+});
+
 </script>
 </body>
