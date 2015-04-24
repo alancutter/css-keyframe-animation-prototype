@@ -104,7 +104,6 @@ chromeTrail.addEventListener('click', function() {
     var toY = ['0px', '0px', '0px', '0px'];
     for (var to of [toX, toY]) {
       to[i] = (((Math.random() * 2 - 1) * 100) >> 0) + 'px';
-      console.log(to);
     }
     chromeTrail.animate([
       {'background-position-x': '0px, 0px, 0px, 0px', 'background-position-y': '0px, 0px, 0px, 0px', composite: 'add'},
