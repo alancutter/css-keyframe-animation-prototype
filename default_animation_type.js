@@ -6,13 +6,10 @@ function DefaultAnimationType(property) {
 }
 
 defineMethods(DefaultAnimationType, {
-  maybeConvertPair: function(startKeyframe, endKeyframe) {
+  maybeConvertPair: function(startKeyframe, endKeyframe, environment, underlyingValue) {
     return null;
   },
-  maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
-    return null;
-  },
-  maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
+  maybeConvertSingle: function(keyframe, environment, underlyingValue) {
     if (keyframe) {
       return {
         isInvalid: null,
@@ -21,9 +18,6 @@ defineMethods(DefaultAnimationType, {
       };
     }
     return null;
-  },
-  equalNonInterpolableValues: function(a, b) {
-    return true;
   },
   interpolate: lerp,
   maybeConvertEnvironment: function(environment) {

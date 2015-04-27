@@ -21,7 +21,7 @@ function runTests() {
       var pass = actual == expectation.is;
       var testText = (pass ? 'PASS' : 'FAIL') + ': ' + inputs.property + ' at ' + expectation.at + ' expected ' + expectation.is + ' was ' + actual + '\n';
       if (pass) {
-        console.log('PASS:', testText);
+        console.log(testText);
       } else {
         console.assert(false, testText);
       }

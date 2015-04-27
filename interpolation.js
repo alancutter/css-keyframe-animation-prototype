@@ -5,7 +5,7 @@ function Interpolation(immutableData) {
   this.immutable = immutableData;
   this.cache = null;
   for (var animationType of this.immutable.animationTypes) {
-    var resultPair = animationType.maybeConvertPair(this.immutable.start, this.immutable.end);
+    var resultPair = animationType.maybeConvertPair(this.immutable.start, this.immutable.end, null, null);
     if (resultPair) {
       this.cacheResultPair(animationType, resultPair);
       break;
@@ -19,8 +19,8 @@ function Interpolation(immutableData) {
 }
 
 Interpolation.prototype.cacheResultPair = function(animationType, resultPair) {
-  // console.log('cached pair', animationType.constructor.name);
   this.cache = {
+    isPair: true,
     start: {
       isInvalid: resultPair.start.isInvalid,
       animationValue: {
@@ -52,10 +52,7 @@ Interpolation.prototype.interpolate = function(fraction) {
   }
   var startValue = this.cache.start.animationValue;
   var endValue = this.cache.end.animationValue;
-  if (startValue
-      && endValue
-      && startValue.animationType === endValue.animationType
-      && startValue.animationType.equalNonInterpolableValues(startValue.nonInterpolableValue, endValue.nonInterpolableValue)) {
+  if (this.cache.isPair) {
     this.state.animationValue = {
       animationType: startValue.animationType,
       interpolableValue: startValue.animationType.interpolate(startValue.interpolableValue, endValue.interpolableValue, fraction),
@@ -99,20 +96,22 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
     if (hasNeutral && underlyingValue && underlyingValue.animationType != animationType) {
       continue;
     }
-    var resultPair = animationType.maybeConvertPairInEnvironment(this.immutable.start, this.immutable.end, environment, underlyingValue);
+    var resultPair = animationType.maybeConvertPair(this.immutable.start, this.immutable.end, environment, underlyingValue);
     if (resultPair) {
       this.cacheResultPair(resultPair);
       break;
     }
   }
   if (!this.cache) {
-    this.cache = {};
+    this.cache = {
+      isPair: false,
+    };
     for (var side of ['start', 'end']) {
       var keyframe = this.immutable[side];
       var result = null;
       if (!isNeutralKeyframe(keyframe)) {
         for (var animationType of this.immutable.animationTypes) {
-          result = animationType.maybeConvertSingleInEnvironment(keyframe, environment, underlyingValue);
+          result = animationType.maybeConvertSingle(keyframe, environment, underlyingValue);
           if (result) {
             break;
           }

@@ -8,35 +8,22 @@ function RepeatListAnimationType(property, subType) {
 
 defineMethods(RepeatListAnimationType, {
   maybeConvertPair: function(startKeyframe, endKeyframe) {
-    for (var keyframe of [startKeyframe, endKeyframe]) {
-      if (!keyframe || keyframe.value == 'inherit') {
-        return null;
-      }
-    }
-    if (startKeyframe.composite != endKeyframe.composite) {
-      return null;
-    }
-
-    var startItems = startKeyframe.value.split(', ');
-    var endItems = endKeyframe.value.split(', ');
-    if (keyframe.composite != 'replace' && startItems.length != endItems.length) {
-      return null;
-    }
-
-    return this._convertItemListPair(startItems, endItems, startKeyframe.composite);
+    return this.maybeConvertPairInEnvironment(startKeyframe, endKeyframe, null, null);
   },
-  _convertItemListPair: function(startItems, endItems, composite) {
+  _maybeConvertItemListPair: function(inputs) {
     var result = {};
     for (var side of ['start', 'end']) {
       result[side] = {
-        isInvalid: [],
+        isInvalid: inputs[side].isInvalid,
         interpolableValue: [],
         nonInterpolableValue: {
-          composite: composite,
+          composite: inputs.composite,
           subValues: [],
         },
       };
     }
+    var startItems = inputs.start.items;
+    var endItems = inputs.end.items;
     for (var i = 0; i < startItems.length || i < endItems.length; i++) {
       var startItem = startItems[i % startItems.length];
       var endItem = endItems[i % endItems.length];
@@ -47,23 +34,35 @@ defineMethods(RepeatListAnimationType, {
         return null;
       }
       for (var side of ['start', 'end']) {
-        result[side].isInvalid.push(subResult[side].isInvalid);
+        result[side].isInvalid = chain(result[side].isInvalid, subResult[side].isInvalid);
         result[side].interpolableValue.push(subResult[side].interpolableValue);
         result[side].nonInterpolableValue.subValues.push(subResult[side].nonInterpolableValue);
       }
     }
-    ['start', 'end'].forEach(function(side) {
-      var isInvalidList = result[side].isInvalid.filter(identity);
-      result[side].isInvalid = (isInvalidList.length == 0) ? null : function(environment, underlyingValue) {
-        return isInvalidList.some(function(isInvalid) {
-          return isInvalid(environment, null);
-        });
-      };
-    });
     return result;
   },
   maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
-    return this.maybeConvertPair(startKeyframe, endKeyframe);
+    var keyframes = {
+      start: startKeyframe,
+      end: endKeyframe,
+    };
+    var values = {};
+    for (var side in keyframes) {
+      var value = this._resolveKeyframe(keyframes[side]);
+      var keyframe = keyframes[side];
+      if (!keyframe) {
+        return null;
+      } else if (keyframe.value == 'inherit') {
+        if (!environment) {
+          return null;
+        }
+        values[side].value = environment.getParent(this.property).split(', ');
+      } else {
+        values[side] = keyframe.value.split(', ');
+      }
+    }
+
+    return this._maybeConvertItemListPair(values);
   },
   maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
     return null;

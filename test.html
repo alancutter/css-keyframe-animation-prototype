@@ -11,8 +11,8 @@
 
 <style>
 .parent {
-  background-image: url(#), url(#), url(#);
-  background-position-x: 100px, 200px, 300px;
+  background-image: url(#), url(#);
+  background-position-x: 100px, 200px
 }
 .target {
   font-size: 10px;
@@ -47,24 +47,40 @@ testAnimations({
   ],
 });
 
-testAnimations({
-  property: 'background-position-x',
-  animations: [[
-    {value: '0px'}, {value: '0px'},
-  ], [
-    {value: '0px, 100px', composite: 'add'},
-    {value: '100px, 0px', composite: 'add'},
-  ]],
-  expect: [
-    {at: -1, is: '-100px, 200px'},
-    {at: 0, is: '0px, 100px'},
-    {at: 0.25, is: '25px, 75px'},
-    {at: 0.5, is: '50px, 50px'},
-    {at: 0.75, is: '75px, 25px'},
-    {at: 1, is: '100px, 0px'},
-    {at: 2, is: '200px, -100px'},
-  ],
-});
+// testAnimations({
+//   property: 'background-position-x',
+//   animations: [[
+//     {value: '0px'}, {value: '0px'},
+//   ], [
+//     {value: '0px, 100px', composite: 'add'},
+//     {value: '100px, 0px', composite: 'add'},
+//   ]],
+//   expect: [
+//     {at: -1, is: '-100px, 200px'},
+//     {at: 0, is: '0px, 100px'},
+//     {at: 0.25, is: '25px, 75px'},
+//     {at: 0.5, is: '50px, 50px'},
+//     {at: 0.75, is: '75px, 25px'},
+//     {at: 1, is: '100px, 0px'},
+//     {at: 2, is: '200px, -100px'},
+//   ],
+// });
+
+// testAnimations({
+//   property: 'background-position-x',
+//   animations: [[
+//     {value: 'inherit'}, {value: '100px'},
+//   ]],
+//   expect: [
+//     {at: -1, is: ''},
+//     {at: 0, is: '100px, 200px'},
+//     {at: 0.25, is: ''},
+//     {at: 0.5, is: ''},
+//     {at: 0.75, is: ''},
+//     {at: 1, is: '100px, 100px'},
+//     {at: 2, is: ''},
+//   ],
+// });
 
 var validBackgroundPositionXValues = [
   null,

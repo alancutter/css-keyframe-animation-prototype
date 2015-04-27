@@ -8,6 +8,18 @@ function add(underlyingInterpolableValue, underlyingNonInterpolableValue, underl
   };
 }
 
+function chain(isInvaildA, isInvalidB) {
+  if (!isInvaildA) {
+    return isInvalidB;
+  }
+  if (!isInvalidB) {
+    return isInvaildA;
+  }
+  return function(environment, underlyingValue) {
+    return isInvaildA(environment, underlyingValue) || isInvalidB(environment, underlyingValue);
+  }
+}
+
 function defineMethods(func, methods) {
   var properties = {};
   for (var i in methods) {

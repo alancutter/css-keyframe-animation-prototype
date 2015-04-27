@@ -6,6 +6,11 @@ function StyleEnvironment(element) {
   element.style.cssText = '';
 }
 
+StyleEnvironment.prototype.getParent = function(property) {
+  console.assert(!this.element.parent.style[property], 'Base style mocking not yet implemented');
+  return getComputedStyle(this.element.parent)[property];
+};
+
 StyleEnvironment.prototype.get = function(property) {
   console.assert(!this.element.style[property], 'Base style mocking not yet implemented');
   return getComputedStyle(this.element)[property];

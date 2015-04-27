@@ -7,7 +7,21 @@ function LengthAnimationType(property, clamping) {
 }
 
 defineMethods(LengthAnimationType, {
-  _maybeConvertSingle: function(keyframe) {
+  maybeConvertPair: function(startKeyframe, endKeyframe, environment, underlyingValue) {
+    var start = this.maybeConvertSingle(startKeyframe, environment, underlyingValue);
+    if (!start) {
+      return null;
+    }
+    var end = this.maybeConvertSingle(endKeyframe, environment, underlyingValue);
+    if (!end) {
+      return null;
+    }
+    return {
+      start: start,
+      end: end,
+    };
+  },
+  maybeConvertSingle: function(keyframe, environment, underlyingValue) {
     if (!keyframe) {
       return {
         isInvalid: function(environment, underlyingValue) {
@@ -17,10 +31,18 @@ defineMethods(LengthAnimationType, {
         nonInterpolableValue: null,
       };
     }
-    return this._maybeConvertValue(keyframe.value);
-  },
-  _maybeConvertValue: function(value) {
-    var match = /(.*)px/.exec(value);
+
+    var resolvedValue = keyframe.value;
+    var isInvalid = null;
+    if (resolvedValue == 'inherit') {
+      resolvedValue = environment.getParent(this.property);
+      var property = this.property;
+      isInvalid = function(environment, underlyingValue) {
+        return environment.getParent(property) != resolvedValue;
+      };
+    }
+
+    var match = /(.*)px/.exec(resolvedValue);
     if (!match) {
       return null;
     }
@@ -29,44 +51,10 @@ defineMethods(LengthAnimationType, {
       return null;
     }
     return {
-      isInvalid: null,
+      isInvalid: isInvalid,
       interpolableValue: number,
       nonInterpolableValue: null,
     };
-  },
-  maybeConvertPair: function(startKeyframe, endKeyframe) {
-    var start = this._maybeConvertSingle(startKeyframe);
-    if (!start) {
-      return null;
-    }
-    var end = this._maybeConvertSingle(endKeyframe);
-    if (!end) {
-      return null;
-    }
-    return {
-      start: start,
-      end: end,
-    };
-  },
-  maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
-    var start = this.maybeConvertSingleInEnvironment(startKeyframe, environment, underlyingValue);
-    if (!start) {
-      return null;
-    }
-    var end = this.maybeConvertSingleInEnvironment(endKeyframe, environment, underlyingValue);
-    if (!end) {
-      return null;
-    }
-    return {
-      start: start,
-      end: end,
-    };
-  },
-  maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
-    return this._maybeConvertSingle(keyframe);
-  },
-  equalNonInterpolableValues: function(a, b) {
-    return true;
   },
   interpolate: lerp,
   add: add,
