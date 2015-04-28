@@ -35,6 +35,9 @@ defineMethods(LengthAnimationType, {
     var resolvedValue = keyframe.value;
     var isInvalid = null;
     if (resolvedValue == 'inherit') {
+      if (!environment) {
+        return null;
+      }
       resolvedValue = environment.getParent(this.property);
       var property = this.property;
       isInvalid = function(environment, underlyingValue) {
@@ -42,6 +45,9 @@ defineMethods(LengthAnimationType, {
       };
     }
 
+    return this._maybeConvertResolvedValue(resolvedValue, isInvalid);
+  },
+  _maybeConvertResolvedValue: function(resolvedValue, isInvalid) {
     var match = /(.*)px/.exec(resolvedValue);
     if (!match) {
       return null;
@@ -59,7 +65,7 @@ defineMethods(LengthAnimationType, {
   interpolate: lerp,
   add: add,
   maybeConvertEnvironment: function(environment) {
-    return this._maybeConvertValue(environment.get(this.property));
+    return this._maybeConvertResolvedValue(environment.get(this.property), null);
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
     environment.set(this.property, this.cssValue(interpolableValue, nonInterpolableValue));

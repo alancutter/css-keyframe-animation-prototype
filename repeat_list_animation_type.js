@@ -7,48 +7,16 @@ function RepeatListAnimationType(property, subType) {
 }
 
 defineMethods(RepeatListAnimationType, {
-  maybeConvertPair: function(startKeyframe, endKeyframe) {
-    return this.maybeConvertPairInEnvironment(startKeyframe, endKeyframe, null, null);
-  },
-  _maybeConvertItemListPair: function(inputs) {
-    var result = {};
-    for (var side of ['start', 'end']) {
-      result[side] = {
-        isInvalid: inputs[side].isInvalid,
-        interpolableValue: [],
-        nonInterpolableValue: {
-          composite: inputs.composite,
-          subValues: [],
-        },
-      };
-    }
-    var startItems = inputs.start.items;
-    var endItems = inputs.end.items;
-    for (var i = 0; i < startItems.length || i < endItems.length; i++) {
-      var startItem = startItems[i % startItems.length];
-      var endItem = endItems[i % endItems.length];
-      var subResult = this.subType.maybeConvertPair(
-          {value: startItem, composite: composite},
-          {value: endItem, composite: composite});
-      if (!subResult) {
-        return null;
-      }
-      for (var side of ['start', 'end']) {
-        result[side].isInvalid = chain(result[side].isInvalid, subResult[side].isInvalid);
-        result[side].interpolableValue.push(subResult[side].interpolableValue);
-        result[side].nonInterpolableValue.subValues.push(subResult[side].nonInterpolableValue);
-      }
-    }
-    return result;
-  },
-  maybeConvertPairInEnvironment: function(startKeyframe, endKeyframe, environment, underlyingValue) {
+  maybeConvertPair: function(startKeyframe, endKeyframe, environment, underlyingValue) {
     var keyframes = {
       start: startKeyframe,
       end: endKeyframe,
     };
-    var values = {};
+    var resolvedKeyframes = {
+      start: {},
+      end: {},
+    };
     for (var side in keyframes) {
-      var value = this._resolveKeyframe(keyframes[side]);
       var keyframe = keyframes[side];
       if (!keyframe) {
         return null;
@@ -56,59 +24,67 @@ defineMethods(RepeatListAnimationType, {
         if (!environment) {
           return null;
         }
-        values[side].value = environment.getParent(this.property).split(', ');
+        resolvedKeyframes[side].value = environment.getParent(this.property).split(', ');
       } else {
-        values[side] = keyframe.value.split(', ');
+        resolvedKeyframes[side].value = keyframe.value.split(', ');
       }
+      resolvedKeyframes[side].composite = keyframes[side].composite;
     }
 
-    return this._maybeConvertItemListPair(values);
-  },
-  maybeConvertSingleInEnvironment: function(keyframe, environment, underlyingValue) {
-    return null;
-  },
-  equalNonInterpolableValues: function(a, b) {
-    if (a.subValues.length != b.subValues.length) {
-      return false;
+    var result = {};
+    for (var side of ['start', 'end']) {
+      result[side] = {
+        isInvalid: null,
+        interpolableValue: [],
+        nonInterpolableValue: [],
+      };
     }
-    var subType = this.subType;
-    return a.subValues.every(function(aItem, i) {
-      return subType.equalNonInterpolableValues(aItem, b.subValues[i]);
-    });
+    var startItems = resolvedKeyframes.start.value;
+    var endItems = resolvedKeyframes.end.value;
+    for (var i = 0; i < startItems.length || i < endItems.length; i++) {
+      var startItem = startItems[i % startItems.length];
+      var endItem = endItems[i % endItems.length];
+      var subResult = this.subType.maybeConvertPair(
+          {value: startItem, composite: resolvedKeyframes.start.composite},
+          {value: endItem, composite: resolvedKeyframes.end.composite});
+      if (!subResult) {
+        return null;
+      }
+      for (var side of ['start', 'end']) {
+        result[side].isInvalid = chain(result[side].isInvalid, subResult[side].isInvalid);
+        result[side].interpolableValue.push(subResult[side].interpolableValue);
+        result[side].nonInterpolableValue.push(subResult[side].nonInterpolableValue);
+      }
+    }
+    return result;
+  },
+  maybeConvertSingle: function(keyframe, environment, underlyingValue) {
+    return null;
   },
   interpolate: lerp,
   add: function(underlyingInterpolableValue, underlyingNonInterpolableValue, underlyingFraction, interpolableValue, nonInterpolableValue) {
-    if (nonInterpolableValue.composite == 'replace') {
-      return {
-        interpolableValue: interpolableValue,
-        nonInterpolableValue: nonInterpolableValue,
-      };
-    }
     var result = {
       interpolableValue: [],
-      nonInterpolableValue: {
-        composite: nonInterpolableValue.composite,
-        subValues: [],
-      },
+      nonInterpolableValue: [],
     }
     var i = 0;
     for (; i < underlyingInterpolableValue.length && i < interpolableValue.length; i++) {
       var subResult = this.subType.add(
           underlyingInterpolableValue[i],
-          underlyingNonInterpolableValue.subValues[i],
+          underlyingNonInterpolableValue[i],
           underlyingFraction,
           interpolableValue[i],
-          nonInterpolableValue.subValues[i]);
+          nonInterpolableValue[i]);
       result.interpolableValue.push(subResult.interpolableValue);
-      result.nonInterpolableValue.subValues.push(subResult.nonInterpolableValue);
+      result.nonInterpolableValue.push(subResult.nonInterpolableValue);
     }
     for (; i < underlyingInterpolableValue.length; i++) {
       result.interpolableValue.push(underlyingInterpolableValue[i]);
-      result.nonInterpolableValue.subValues.push(underlyingNonInterpolableValue.subValues[i]);
+      result.nonInterpolableValue.push(underlyingNonInterpolableValue[i]);
     }
     for (; i < interpolableValue.length; i++) {
       result.interpolableValue.push(interpolableValue[i]);
-      result.nonInterpolableValue.subValues.push(nonInterpolableValue.subValues[i]);
+      result.nonInterpolableValue.push(nonInterpolableValue[i]);
     }
     return result;
   },
@@ -128,7 +104,6 @@ defineMethods(RepeatListAnimationType, {
     return (this.clamping == 'non-negative' && value < 0) ? 0 : value;
   }
 });
-
 
 window.RepeatListAnimationType = RepeatListAnimationType;
 

@@ -61,6 +61,7 @@ function underlyingFractionForkeyframe(keyframe) {
 }
 
 window.add = add;
+window.chain = chain;
 window.defineMethods = defineMethods;
 window.identity = identity;
 window.isNeutralKeyframe = isNeutralKeyframe;
