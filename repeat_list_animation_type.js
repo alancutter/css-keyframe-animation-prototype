@@ -7,28 +7,32 @@ function RepeatListAnimationType(property, subType) {
 }
 
 defineMethods(RepeatListAnimationType, {
+  _resolveKeyframeItems: function(keyframe, environment, underlyingValue) {
+    if (!keyframe) {
+      if (!underlyingValue || underlyingValue.animationType != this) {
+        return null;
+      }
+      console.assert(false);
+    }
+    if (keyframe.value == 'inherit') {
+      if (!environment) {
+        return null;
+      }
+      return environment.getParent(this.property).split(', ');
+    }
+    return keyframe.value.split(', ');
+  },
   maybeConvertPair: function(startKeyframe, endKeyframe, environment, underlyingValue) {
     var keyframes = {
       start: startKeyframe,
       end: endKeyframe,
     };
-    var resolvedKeyframes = {
-      start: {},
-      end: {},
-    };
+    var resolvedItems = {};
     for (var side in keyframes) {
-      var keyframe = keyframes[side];
-      if (!keyframe) {
+      resolvedItems[side] = this._resolveKeyframeItems(keyframes[side], environment, underlyingValue);
+      if (!resolvedItems[side]) {
         return null;
-      } else if (keyframe.value == 'inherit') {
-        if (!environment) {
-          return null;
-        }
-        resolvedKeyframes[side].value = environment.getParent(this.property).split(', ');
-      } else {
-        resolvedKeyframes[side].value = keyframe.value.split(', ');
       }
-      resolvedKeyframes[side].composite = keyframes[side].composite;
     }
 
     var result = {};
@@ -39,14 +43,15 @@ defineMethods(RepeatListAnimationType, {
         nonInterpolableValue: [],
       };
     }
-    var startItems = resolvedKeyframes.start.value;
-    var endItems = resolvedKeyframes.end.value;
-    for (var i = 0; i < startItems.length || i < endItems.length; i++) {
-      var startItem = startItems[i % startItems.length];
-      var endItem = endItems[i % endItems.length];
+    var length = lowestCommonMultiple(resolvedItems.start.length, resolvedItems.end.length);
+    for (var i = 0; i < length; i++) {
+      var startItem = modIndex(resolvedItems.start, i);
+      var endItem = modIndex(resolvedItems.end, i);
       var subResult = this.subType.maybeConvertPair(
-          {value: startItem, composite: resolvedKeyframes.start.composite},
-          {value: endItem, composite: resolvedKeyframes.end.composite});
+          {value: startItem, composite: resolvedItems.start.composite},
+          {value: endItem, composite: resolvedItems.end.composite},
+          environment,
+          null);
       if (!subResult) {
         return null;
       }
@@ -59,6 +64,9 @@ defineMethods(RepeatListAnimationType, {
     return result;
   },
   maybeConvertSingle: function(keyframe, environment, underlyingValue) {
+    return null;
+  },
+  maybeConvertEnvironment: function(environment) {
     return null;
   },
   interpolate: lerp,
@@ -87,9 +95,6 @@ defineMethods(RepeatListAnimationType, {
       result.nonInterpolableValue.push(nonInterpolableValue[i]);
     }
     return result;
-  },
-  maybeConvertEnvironment: function(environment) {
-    return null;
   },
   apply: function(interpolableValue, nonInterpolableValue, environment) {
     environment.set(this.property, this.cssValue(interpolableValue, nonInterpolableValue));

@@ -28,8 +28,8 @@ function defineMethods(func, methods) {
   Object.defineProperties(func.prototype, properties);
 }
 
-function identity(x) {
-  return x;
+function greatestCommonDivisor(a, b) {
+  return b ? greatestCommonDivisor(b, a % b) : a;
 }
 
 function isNeutralKeyframe(keyframe) {
@@ -56,6 +56,14 @@ function lerp(a, b, fraction) {
   return a * (1 - fraction) + b * fraction;
 }
 
+function lowestCommonMultiple(a, b) {
+  return a && b ? a / greatestCommonDivisor(a, b) * b : 0;
+}
+
+function modIndex(array, i) {
+  return array[i % array.length];
+}
+
 function underlyingFractionForkeyframe(keyframe) {
   return !keyframe ? 1 : (keyframe.composite == 'replace' ? 0 : 1);
 }
@@ -63,10 +71,11 @@ function underlyingFractionForkeyframe(keyframe) {
 window.add = add;
 window.chain = chain;
 window.defineMethods = defineMethods;
-window.identity = identity;
 window.isNeutralKeyframe = isNeutralKeyframe;
 window.lastElement = lastElement;
 window.lerp = lerp;
+window.lowestCommonMultiple = lowestCommonMultiple;
+window.modIndex = modIndex;
 window.underlyingFractionForkeyframe = underlyingFractionForkeyframe;
 
 })();

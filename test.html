@@ -16,6 +16,7 @@
 }
 .target {
   font-size: 10px;
+  background-position-x: 0px, 100px;
   background-image: url(#), url(#);
 }
 </style>
@@ -28,59 +29,75 @@
 
 <script>
 testAnimations({
-  property: 'line-height',
-  animations: [
-    [{value: '0'}, {value: '0'}],
-    [null, {value: '5px', composite: 'add'}],
-    [null, {value: '5', composite: 'add'}],
-  ],
-  expect: [
-    // getComputedStyle resolves numbers as pixels.
-    // line-height must be non-negative.
-    {at: -1, is: '0px'},
-    {at: 0, is: '0px'},
-    {at: 0.25, is: '12.5px'},
-    {at: 0.5, is: '50px'},
-    {at: 0.75, is: '50px'},
-    {at: 1, is: '50px'},
-    {at: 2, is: '50px'},
-  ],
-});
-
-testAnimations({
   property: 'background-position-x',
-  animations: [[
-    {value: '0px'}, {value: '0px'},
-  ], [
-    {value: '0px, 100px', composite: 'add'},
-    {value: '100px, 0px', composite: 'add'},
-  ]],
+  animations: [
+    [null, {value: '100px, 200px'}],
+  ],
   expect: [
-    {at: -1, is: '-100px, 200px'},
+    {at: -1, is: '-100px, 0px'},
     {at: 0, is: '0px, 100px'},
-    {at: 0.25, is: '25px, 75px'},
-    {at: 0.5, is: '50px, 50px'},
-    {at: 0.75, is: '75px, 25px'},
-    {at: 1, is: '100px, 0px'},
-    {at: 2, is: '200px, -100px'},
+    {at: 0.25, is: '25px, 125px'},
+    {at: 0.5, is: '50px, 150px'},
+    {at: 0.75, is: '75px, 175px'},
+    {at: 1, is: '100px, 200px'},
+    {at: 2, is: '200px, 300px'},
   ],
 });
 
-// testAnimations({
-//   property: 'background-position-x',
-//   animations: [[
-//     {value: 'inherit'}, {value: '100px'},
-//   ]],
-//   expect: [
-//     {at: -1, is: ''},
-//     {at: 0, is: '100px, 200px'},
-//     {at: 0.25, is: ''},
-//     {at: 0.5, is: ''},
-//     {at: 0.75, is: ''},
-//     {at: 1, is: '100px, 100px'},
-//     {at: 2, is: ''},
-//   ],
-// });
+if (true) {
+  testAnimations({
+    property: 'background-position-x',
+    animations: [
+      [{value: 'inherit'}, {value: '200px, 300px'}],
+    ],
+    expect: [
+      {at: -1, is: '0px, 100px'},
+      {at: 0, is: '100px, 200px'},
+      {at: 0.25, is: '125px, 225px'},
+      {at: 0.5, is: '150px, 250px'},
+      {at: 0.75, is: '175px, 275px'},
+      {at: 1, is: '200px, 300px'},
+      {at: 2, is: '300px, 400px'},
+    ],
+  });
+
+  testAnimations({
+    property: 'background-position-x',
+    animations: [
+      [{value: '0px'}, {value: '0px'}],
+      [{value: '0px, 100px', composite: 'add'}, {value: '100px, 0px', composite: 'add'}],
+    ],
+    expect: [
+      {at: -1, is: '-100px, 200px'},
+      {at: 0, is: '0px, 100px'},
+      {at: 0.25, is: '25px, 75px'},
+      {at: 0.5, is: '50px, 50px'},
+      {at: 0.75, is: '75px, 25px'},
+      {at: 1, is: '100px, 0px'},
+      {at: 2, is: '200px, -100px'},
+    ],
+  });
+
+  testAnimations({
+    property: 'line-height',
+    animations: [
+      [{value: '0'}, {value: '0'}],
+      [null, {value: '5px', composite: 'add'}],
+      [null, {value: '5', composite: 'add'}],
+    ],
+    expect: [
+      // getComputedStyle resolves numbers as pixels.
+      // line-height must be non-negative.
+      {at: -1, is: '0px'},
+      {at: 0, is: '0px'},
+      {at: 0.25, is: '12.5px'},
+      {at: 0.5, is: '50px'},
+      {at: 0.75, is: '50px'},
+      {at: 1, is: '50px'},
+      {at: 2, is: '50px'},
+    ],
+  });
+}
 
 var validBackgroundPositionXValues = [
   null,

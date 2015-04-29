@@ -7,8 +7,8 @@ function StyleEnvironment(element) {
 }
 
 StyleEnvironment.prototype.getParent = function(property) {
-  console.assert(!this.element.parent.style[property], 'Base style mocking not yet implemented');
-  return getComputedStyle(this.element.parent)[property];
+  console.assert(!this.element.parentElement.style[property], 'Base style mocking not yet implemented');
+  return getComputedStyle(this.element.parentElement)[property];
 };
 
 StyleEnvironment.prototype.get = function(property) {

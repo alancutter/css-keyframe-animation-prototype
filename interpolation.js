@@ -98,7 +98,7 @@ Interpolation.prototype.validateCache = function(environment, underlyingValue) {
     }
     var resultPair = animationType.maybeConvertPair(this.immutable.start, this.immutable.end, environment, underlyingValue);
     if (resultPair) {
-      this.cacheResultPair(resultPair);
+      this.cacheResultPair(animationType, resultPair);
       break;
     }
   }
