@@ -67,7 +67,11 @@ Interpolation.prototype.getUnderlyingValue = function(environment) {
   for (var animationType of this.immutable.animationTypes) {
     var result = animationType.maybeConvertEnvironment(environment);
     if (result) {
-      return result;
+      return {
+        animationType: animationType,
+        interpolableValue: result.interpolableValue,
+        nonInterpolableValue: result.nonInterpolableValue,
+      };
     }
   }
   return null;

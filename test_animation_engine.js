@@ -27,6 +27,7 @@ function runTests() {
       }
       output.textContent += testText;
     }
+    output.textContent += '\n';
   }
 }
 
