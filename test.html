@@ -18,6 +18,7 @@
   font-size: 10px;
   background-position-x: 0px, 100px;
   background-image: url(#), url(#);
+  transform: rotate(100deg);
 }
 </style>
 
@@ -29,22 +30,38 @@
 
 <script>
 testAnimations({
-  property: 'background-position-x',
+  property: 'transform',
   animations: [
-    [{value: 'inherit', composite: 'add'}, {value: '100px, 200px'}],
+    [{value: 'translateX(100px)', composite: 'add'}, {value: 'none'}],
   ],
   expect: [
-    {at: -1, is: '100px, 400px'},
-    {at: 0, is: '100px, 300px'},
-    {at: 0.25, is: '100px, 275px'},
-    {at: 0.5, is: '100px, 250px'},
-    {at: 0.75, is: '100px, 225px'},
-    {at: 1, is: '100px, 200px'},
-    {at: 2, is: '100px, 100px'},
+    {at: -1, is: 'rotate(200deg) translate(200px)'},
+    {at: 0, is: 'rotate(100deg) translate(100px)'},
+    {at: 0.25, is: 'rotate(75deg) translate(75px)'},
+    {at: 0.5, is: 'rotate(50deg) translate(50px)'},
+    {at: 0.75, is: 'rotate(25deg) translate(25px)'},
+    {at: 1, is: 'none'},
+    {at: 2, is: 'rotate(-100deg) translate(-100px)'},
   ],
 });
 
 if (true) {
+  testAnimations({
+    property: 'background-position-x',
+    animations: [
+      [{value: 'inherit', composite: 'add'}, {value: '100px, 200px'}],
+    ],
+    expect: [
+      {at: -1, is: '100px, 400px'},
+      {at: 0, is: '100px, 300px'},
+      {at: 0.25, is: '100px, 275px'},
+      {at: 0.5, is: '100px, 250px'},
+      {at: 0.75, is: '100px, 225px'},
+      {at: 1, is: '100px, 200px'},
+      {at: 2, is: '100px, 100px'},
+    ],
+  });
+
   testAnimations({
     property: 'background-position-x',
     animations: [

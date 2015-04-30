@@ -9,6 +9,7 @@ function testAnimations(inputs) {
 
 function runTests() {
   var output = createElement('pre', 'output', document.body);
+  var expectationDump = createElement('div', null, document.body);
   for (var inputs of tests) {
     assertAttributes('property animations expect', inputs);
     var keyframesList = getKeyframesList(inputs.property, inputs.animations);
@@ -17,8 +18,12 @@ function runTests() {
       assertAttributes('at is', expectation);
       var target = createTarget(container);
       applyKeyframesList(target, keyframesList, expectation.at);
+      var expectationTarget = createTarget(container);
+      expectationTarget.style[inputs.property] = expectation.is;
       var actual = getComputedStyle(target)[inputs.property];
-      var pass = actual == expectation.is;
+      var expected = getComputedStyle(expectationTarget)[inputs.property];
+      expectationTarget.remove();
+      var pass = actual == expected;
       var testText = (pass ? 'PASS' : 'FAIL') + ': ' + inputs.property + ' at ' + expectation.at + ' expected ' + expectation.is + ' was ' + actual + '\n';
       if (pass) {
         console.log(testText);
@@ -29,6 +34,7 @@ function runTests() {
     }
     output.textContent += '\n';
   }
+  expectationDump.remove();
 }
 
 function assertAttributes(attributes, inputs) {
