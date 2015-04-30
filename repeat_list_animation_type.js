@@ -15,12 +15,13 @@ defineMethods(RepeatListAnimationType, {
     var sideSubKeyframes = {};
     var result = {};
     for (var side of ['start', 'end']) {
-      sideSubKeyframes[side] = this._maybeResolveSubKeyframes(keyframes[side], environment, underlyingValue);
-      if (!sideSubKeyframes[side]) {
+      var sideResult = this._maybeResolveSubKeyframes(keyframes[side], environment, underlyingValue);
+      if (!sideResult) {
         return null;
       }
+      sideSubKeyframes[side] = sideResult.subKeyframes;
       result[side] = {
-        isInvalid: null,
+        isInvalid: sideResult.isInvalid,
         interpolableValue: [],
         nonInterpolableValue: [],
       };
@@ -45,6 +46,7 @@ defineMethods(RepeatListAnimationType, {
     return result;
   },
   _maybeResolveSubKeyframes: function(keyframe, environment, underlyingValue) {
+    var isInvalid = null;
     var subKeyframes = [];
     if (!keyframe) {
       if (!underlyingValue || underlyingValue.animationType != this) {
@@ -53,13 +55,21 @@ defineMethods(RepeatListAnimationType, {
       for (var i of underlyingValue.interpolableValue) {
         subKeyframes.push(null);
       }
+      isInvalid = function(environment, underlyingValue) {
+        return !underlyingValue || underlyingValue.animationType != this;
+      };
     } else {
       var items;
       if (keyframe.value == 'inherit') {
         if (!environment) {
           return null;
         }
-        items = environment.getParent(this.property).split(', ');
+        var property = this.property;
+        var parentValue = environment.getParent(property);
+        items = parentValue.split(', ');
+        isInvalid = function(environment, underlyingValue) {
+          return environment.getParent(property) != parentValue;
+        };
       } else {
         items = keyframe.value.split(', ');
       }
@@ -67,11 +77,14 @@ defineMethods(RepeatListAnimationType, {
         return {value: item, composite: keyframe.composite};
       });
     }
-    return subKeyframes;
+    return {
+      isInvalid: isInvalid,
+      subKeyframes: subKeyframes,
+    };
   },
   maybeConvertSingle: function(keyframe, environment, underlyingValue) {
-    var subKeyframes = this._maybeResolveSubKeyframes(keyframe, environment, underlyingValue);
-    if (!subKeyframes) {
+    var subResult = this._maybeResolveSubKeyframes(keyframe, environment, underlyingValue);
+    if (!subResult) {
       return null;
     }
     var result = {
@@ -79,7 +92,7 @@ defineMethods(RepeatListAnimationType, {
       interpolableValue: [],
       nonInterpolableValue: [],
     };
-    for (var subKeyframe of subKeyframes) {
+    for (var subKeyframe of subResult.subKeyframes) {
       var subResult = this.subType.maybeConvertSingle(subKeyframe, environment, underlyingValue);
       result.isInvalid = chain(result.isInvalid, subResult.isInvalid);
       result.interpolableValue.push(subResult.interpolableValue);

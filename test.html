@@ -31,20 +31,36 @@
 testAnimations({
   property: 'background-position-x',
   animations: [
-    [null, {value: '100px, 200px'}],
+    [{value: 'inherit', composite: 'add'}, {value: '100px, 200px'}],
   ],
   expect: [
-    {at: -1, is: '-100px, 0px'},
-    {at: 0, is: '0px, 100px'},
-    {at: 0.25, is: '25px, 125px'},
-    {at: 0.5, is: '50px, 150px'},
-    {at: 0.75, is: '75px, 175px'},
+    {at: -1, is: '100px, 400px'},
+    {at: 0, is: '100px, 300px'},
+    {at: 0.25, is: '100px, 275px'},
+    {at: 0.5, is: '100px, 250px'},
+    {at: 0.75, is: '100px, 225px'},
     {at: 1, is: '100px, 200px'},
-    {at: 2, is: '200px, 300px'},
+    {at: 2, is: '100px, 100px'},
   ],
 });
 
-if (false) {
+if (true) {
+  testAnimations({
+    property: 'background-position-x',
+    animations: [
+      [null, {value: '100px, 200px'}],
+    ],
+    expect: [
+      {at: -1, is: '-100px, 0px'},
+      {at: 0, is: '0px, 100px'},
+      {at: 0.25, is: '25px, 125px'},
+      {at: 0.5, is: '50px, 150px'},
+      {at: 0.75, is: '75px, 175px'},
+      {at: 1, is: '100px, 200px'},
+      {at: 2, is: '200px, 300px'},
+    ],
+  });
+
   testAnimations({
     property: 'background-position-x',
     animations: [
